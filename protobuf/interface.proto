@@ -1,4 +1,5 @@
 syntax = "proto3";
+package protobuf_interface;
 
 message Node {
     bytes public_key = 1;
@@ -11,7 +12,7 @@ service Consensus {
     rpc ClearNodes (Empty) returns (Empty) {}
     rpc EnumerateNodes (Empty) returns (stream Node) {}
     rpc AddNode (Node) returns (Empty) {}
-    rpc RemoveNode (bytes) returns (Empty) {}
+    rpc RemoveNode (PublicKey) returns (Empty) {}
     rpc ChangeVotingPower (Node) returns (Empty) {}
 
     // Interface to submit block
@@ -24,5 +25,9 @@ service Consensus {
 message Empty {}
 
 message Block {
+    bytes data = 1;
+}
+
+message PublicKey {
     bytes data = 1;
 }
