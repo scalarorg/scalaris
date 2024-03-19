@@ -2,9 +2,7 @@ use crate::protobuf_interface::{
     consensus_server::{Consensus, ConsensusServer},
     *,
 };
-use futures::StreamExt;
 use std::collections::HashMap;
-use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use tokio_stream::wrappers::ReceiverStream;
