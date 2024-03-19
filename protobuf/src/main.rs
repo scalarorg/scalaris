@@ -1,5 +1,7 @@
-use protobuf_interface::{consensus_server::Consensus, AddNodeRequest, Empty, Node};
+use protobuf_interface::{consensus_server::Consensus, Empty, Node};
 use tonic::{transport::Server, Request, Response, Status};
+
+use crate::protobuf_interface::consensus_server::ConsensusServer;
 
 pub mod protobuf_interface {
     tonic::include_proto!("protobuf_interface");
@@ -92,7 +94,7 @@ mod tests {
     use tonic::transport::Channel;
 
     async fn create_client() -> ConsensusClient<Channel> {
-        let addr = "[::1]:50051".parse().unwrap();
+        let addr = "[::1]:50051";
         let channel = tonic::transport::Channel::from_shared(addr)
             .unwrap()
             .connect()
