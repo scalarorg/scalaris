@@ -1,17 +1,21 @@
-use tonic::{transport::Server, Request, Response, Status};
-use std::pin::Pin;
-use futures::StreamExt;
-use tokio::sync::Mutex;
-use std::sync::Arc;
 use crate::protobuf_interface::{
     consensus_server::{Consensus, ConsensusServer},
     *,
 };
+use futures::StreamExt;
 use std::collections::HashMap;
+use std::pin::Pin;
+use std::sync::Arc;
+use tokio::sync::Mutex;
 use tokio_stream::wrappers::ReceiverStream;
+use tonic::{transport::Server, Request, Response, Status};
 
 pub struct SimpleConsensus {
     nodes: Arc<Mutex<HashMap<Vec<u8>, Node>>>, // Using HashMap for easier node management based on public_key
+}
+
+pub mod protobuf_interface {
+    tonic::include_proto!("protobuf_interface");
 }
 
 #[tonic::async_trait]
@@ -24,7 +28,10 @@ impl Consensus for SimpleConsensus {
 
     type EnumerateNodesStream = ReceiverStream<Result<Node, Status>>;
 
-    async fn enumerate_nodes(&self, request: Request<Empty>) -> Result<Response<Self::EnumerateNodesStream>, Status> {
+    async fn enumerate_nodes(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<Self::EnumerateNodesStream>, Status> {
         let nodes = self.nodes.lock().await;
         let (tx, rx) = tokio::sync::mpsc::channel(4);
 
@@ -66,7 +73,10 @@ impl Consensus for SimpleConsensus {
 
     type GetBlockStreamStream = ReceiverStream<Result<Block, Status>>;
 
-    async fn get_block_stream(&self, request: Request<Empty>) -> Result<Response<Self::GetBlockStreamStream>, Status> {
+    async fn get_block_stream(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<Self::GetBlockStreamStream>, Status> {
         let (tx, rx) = tokio::sync::mpsc::channel(4);
 
         // Example: Sending an empty block for demonstration
