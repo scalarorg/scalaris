@@ -100,3 +100,66 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::protobuf_interface::{consensus_client::ConsensusClient, Node, PublicKey};
+    use std::collections::HashMap;
+    use std::sync::Arc;
+    use tokio::time::{sleep, Duration};
+    use tonic::transport::Channel;
+
+    #[tokio::test]
+    async fn test_grpc_server() {
+        let mut retries = 0;
+        loop {
+            retries += 1;
+            // Start the gRPC server in a separate task
+            let server_task = tokio::spawn(async {
+                let addr = "[::1]:39212".parse().unwrap();
+                let consensus = SimpleConsensus {
+                    nodes: Arc::new(Mutex::new(HashMap::new())),
+                };
+
+                Server::builder()
+                    .add_service(ConsensusServer::new(consensus))
+                    .serve(addr)
+                    .await
+                    .unwrap();
+            });
+
+            sleep(Duration::from_secs(1)).await;
+
+            // Create an in-memory gRPC client to interact with the server
+            let channel = match Channel::from_static("http://[::1]:39212").connect().await {
+                Ok(channel) => channel,
+                Err(error) => {
+                    if retries >= 100000 {
+                        println!("Failed to connect after 100000 retries. Exiting.");
+                        panic!("{}", error);
+                    }
+                    continue;
+                }
+            };
+            let mut client = ConsensusClient::new(channel);
+
+            // Test RPC calls
+            let _ = client.clear_nodes(Empty {}).await.unwrap();
+            let _ = client
+                .add_node(Node {
+                    public_key: vec![],
+                    address: "localhost".to_string(),
+                    voting_power: 1,
+                })
+                .await
+                .unwrap();
+
+            // Add more test cases for other RPC calls as needed
+
+            // Stop the server after testing
+            server_task.abort();
+            break;
+        }
+    }
+}
