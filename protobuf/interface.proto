@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+message Node {
+    bytes public_key = 1;
+    string address = 2;
+    int32 voting_power = 3;
+}
+
+service Consensus {
+    // Manage list of nodes
+    rpc ClearNodes (Empty) returns (Empty) {}
+    rpc EnumerateNodes (Empty) returns (stream Node) {}
+    rpc AddNode (Node) returns (Empty) {}
+    rpc RemoveNode (bytes) returns (Empty) {}
+    rpc ChangeVotingPower (Node) returns (Empty) {}
+
+    // Interface to submit block
+    rpc SubmitBlock (Block) returns (Empty) {}
+
+    // Interface to get stream of blocks
+    rpc GetBlockStream (Empty) returns (stream Block) {}
+}
+
+message Empty {}
+
+message Block {
+    bytes data = 1;
+}
