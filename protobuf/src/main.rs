@@ -129,8 +129,6 @@ mod tests {
                     .unwrap();
             });
 
-            sleep(Duration::from_secs(1)).await;
-
             // Create an in-memory gRPC client to interact with the server
             let channel = match Channel::from_static("http://[::1]:39212").connect().await {
                 Ok(channel) => channel,
