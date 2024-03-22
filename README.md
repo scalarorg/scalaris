@@ -15,7 +15,15 @@ Multiple transactions form a batch. Multiple batches form a block.
 Transactions are sent through the interface, then the interface routes transactions to workers for processing. A transaction is just binary data, this code doesn't try to understand the content of the transaction.
 - Send transaction
   + The interface calls a remote function provided by the execution layer to check if the transaction actually makes sense. If the transaction doesn't make sense, it is ignored. Otherwise, the transaction can be included in a block.
-- Get blocks
+- Get a stream of blocks
   + The Narwhal Bullshark consensus protocol orders blocks and emits them to the execution layer.
 ## Testing
 - Existing code is tested with `cargo test`
+- End to end test:
+  + Three nodes are spawned on
+    * one machine
+    * three separate machines
+  + Each node has three workers
+  + Submit transactions to three nodes
+  + Check if all three nodes emit the same stream of blocks
+  + Check if the blocks emitted include all the submitted transactions
