@@ -1,7 +1,8 @@
 # PackagedNarwhalBullshark
 ## High level strategy
 - Expose ordered blocks in `async fn analyze()`
-- Drive the Narwhal Bullshark code using an external process
+- Drive the Narwhal Bullshark code using an external process written in Rust
+- Every X amount of time, the committee is destroyed and changes to the committee are applied.
 ## Interface
 ### Committee
 A node consists of public key, network address and voting power. Changes to the committee are only applied in the next epoch.
