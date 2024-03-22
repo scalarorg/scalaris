@@ -22,7 +22,7 @@ Transactions are sent through the interface, then the interface routes transacti
 - End to end test:
   + Three nodes are spawned on
     * one machine
-    * three separate machines
+    * or three separate machines
   + Each node has three workers
   + Submit transactions to three nodes
   + Check if all three nodes emit the same stream of blocks
