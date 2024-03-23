@@ -20,6 +20,7 @@ Transactions are sent through the interface, then the interface routes transacti
   + The interface calls a remote function provided by the execution layer to check if the transaction actually makes sense. If the transaction doesn't make sense, it is ignored. Otherwise, the transaction can be included in a block.
 - Get a stream of blocks
   + The Narwhal Bullshark consensus protocol orders blocks and emits them to the execution layer.
+  + **Stalling:** If you stop consuming blocks, blocks stop being produced!
 ## Testing
 - Existing code is tested with `cargo test`
 - End to end test:
