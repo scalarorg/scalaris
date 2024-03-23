@@ -11,6 +11,8 @@ A node consists of public key, network address and voting power. Changes to the 
 - Clear all nodes
 - Change voting power
 ### Blocks
+**Namespacing:** There are multiple chains, they have separate streams. When sending a transaction you have to specify the chain. When reading ordered blocks you also have to specify the chain. All chains have the same committee.
+
 Multiple transactions form a batch. Multiple batches form a block.
 
 Transactions are sent through the interface, then the interface routes transactions to workers for processing. A transaction is just binary data, this code doesn't try to understand the content of the transaction.
