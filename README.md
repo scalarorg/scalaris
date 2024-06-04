@@ -1,1 +1,1 @@
-# PackagedNarwhalBullshark
+# Scalaris framework
