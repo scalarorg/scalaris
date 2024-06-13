@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package service;
+import "types.proto";
+
+ // Echo is the echo service.
+ service ConsensusApi {
+   // UnaryEcho is unary echo.
+   rpc Echo(types.RequestEcho) returns (types.ResponseEcho);
+   rpc GetValidatorInfo(types.Empty) returns (types.ValidatorInfo);
+   rpc GetValidatorState(types.Empty) returns (types.ValidatorState);
+   // BidirectionalStreamingScalarAbci is bidi streaming.
+   rpc InitTransaction(stream types.ExternalTransaction) returns (stream types.ConsensusOutput) {}
+ }

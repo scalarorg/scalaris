@@ -1,11 +1,10 @@
 // Copyright (c) Scalaris, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use anyhow::{anyhow, Result};
-use consensus_common::proto::{
-    ConsensusApi, Empty, ExternalTransaction, RequestEcho, ResponseEcho, ValidatorInfo,
-    ValidatorState,
+use crate::proto::{
+    Empty, ExternalTransaction, RequestEcho, ResponseEcho, ValidatorInfo, ValidatorState,
 };
+use anyhow::{anyhow, Result};
 use mysten_metrics::histogram::Histogram as MystenHistogram;
 use narwhal_types::Transaction;
 use prometheus::{
@@ -28,9 +27,7 @@ use crate::authority::AuthorityState;
 use crate::consensus_client::SubmitToConsensus;
 use crate::consensus_handler::ConsensusListener;
 use crate::consensus_manager::ConsensusClient;
-use crate::consensus_types::{
-    ConsensusServiceResult, ConsensusStreamItem, InternalConsensusTransaction, ResponseStream,
-};
+use crate::consensus_types::{ConsensusServiceResult, ConsensusStreamItem, ResponseStream};
 use tonic::transport::server::TcpConnectInfo;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -48,27 +45,29 @@ impl ChainTransaction {
     }
 }
 
-impl Into<ExternalTransaction> for ChainTransaction {
-    fn into(self) -> ExternalTransaction {
-        let ChainTransaction {
-            chain_id,
-            transaction,
-        } = self;
-        ExternalTransaction {
-            chain_id,
-            tx_bytes: transaction,
-        }
-    }
-}
+// impl Into<ExternalTransaction> for ChainTransaction {
+//     fn into(self) -> ExternalTransaction {
+//         let ChainTransaction {
+//             chain_id,
+//             transaction,
+//         } = self;
+//         ExternalTransaction {
+//             chain_id,
+//             tx_bytes: transaction,
+//         }
+//     }
+// }
 
-impl From<ExternalTransaction> for ChainTransaction {
-    fn from(value: ExternalTransaction) -> Self {
-        let ExternalTransaction { chain_id, tx_bytes } = value;
-
-        ChainTransaction {
-            chain_id,
-            transaction: tx_bytes,
-        }
+impl Into<Vec<ChainTransaction>> for ExternalTransaction {
+    fn into(self) -> Vec<ChainTransaction> {
+        let ExternalTransaction { chain_id, tx_bytes } = self;
+        tx_bytes
+            .into_iter()
+            .map(|tx| ChainTransaction {
+                chain_id: chain_id.clone(),
+                transaction: tx,
+            })
+            .collect::<Vec<ChainTransaction>>()
     }
 }
 pub struct ConsensusServerHandle {
@@ -110,13 +109,13 @@ pub struct ConsensusServiceMetrics {
     pub handle_certificate_consensus_latency: MystenHistogram,
     pub handle_certificate_non_consensus_latency: MystenHistogram,
 
-    num_rejected_tx_in_epoch_boundary: IntCounter,
-    num_rejected_cert_in_epoch_boundary: IntCounter,
-    num_rejected_tx_during_overload: IntCounterVec,
-    num_rejected_cert_during_overload: IntCounterVec,
-    connection_ip_not_found: IntCounter,
-    forwarded_header_parse_error: IntCounter,
-    forwarded_header_invalid: IntCounter,
+    pub num_rejected_tx_in_epoch_boundary: IntCounter,
+    pub num_rejected_cert_in_epoch_boundary: IntCounter,
+    pub num_rejected_tx_during_overload: IntCounterVec,
+    pub num_rejected_cert_during_overload: IntCounterVec,
+    pub connection_ip_not_found: IntCounter,
+    pub forwarded_header_parse_error: IntCounter,
+    pub forwarded_header_invalid: IntCounter,
 }
 
 impl ConsensusServiceMetrics {
@@ -272,7 +271,7 @@ impl ConsensusService {
     }
 }
 #[tonic::async_trait]
-impl consensus_common::proto::ConsensusApi for ConsensusService {
+impl crate::ConsensusApi for ConsensusService {
     type InitTransactionStream = ResponseStream;
     async fn echo(
         &self,
@@ -361,11 +360,26 @@ impl ConsensusService {
             &transaction_in
         );
         //Send transaction to the consensus's worker
-        let chain_transaction =
-            InternalConsensusTransaction::ExternalChain(ChainTransaction::from(transaction_in));
-        let tx_bytes = bcs::to_bytes(&chain_transaction).expect("Serialization should not fail.");
+        let chain_txs: Vec<ChainTransaction> = transaction_in.into();
+        // let raw_transactions = chain_txs
+        //     .into_iter()
+        //     .map(|chain_tx| bcs::to_bytes(&chain_tx).expect("Serialization should not fail."))
+        //     .collect::<Vec<Vec<u8>>>();
+        //Submit to consensus layer raw transaction (without chain_id)
+        let raw_transactions = chain_txs
+            .into_iter()
+            .map(
+                |ChainTransaction {
+                     chain_id,
+                     transaction,
+                 }| {
+                    //bcs::to_bytes(&chain_tx).expect("Serialization should not fail.")
+                    transaction
+                },
+            )
+            .collect::<Vec<Vec<u8>>>();
         self.consensus_client
-            .submit_raw_transactions(vec![tx_bytes])
+            .submit_raw_transactions(raw_transactions)
             .await
             .map_err(|err| anyhow!(err.to_string()))
     }

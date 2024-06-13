@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package types;
+
+message Empty {}
+
+message Request {
+  oneof value {
+    RequestEcho echo = 1;
+  }
+  reserved 2;
+}
+
+message Response {
+  oneof value {
+    ResponseEcho echo = 1;
+  }
+  reserved 2;
+}
+
+message RequestEcho {
+  string message = 1;
+}
+
+message ResponseEcho {
+  string message = 1;
+}
+
+message ValidatorInfo {
+  string chain_id = 1;
+  bytes pub_key = 2;
+  bytes private_key = 3;
+  bytes node_private_key = 4;
+}
+
+message ValidatorState {
+  ValidatorInfo validator_info = 1;
+  int64 round = 2;
+}
+
+message ExternalTransaction {
+  string chain_id = 1;            //Namespace used to classify services
+  repeated bytes tx_bytes = 2;    //Transaction hash or some raw data 
+}
+
+message ReputationScore {
+  uint32 authority_index = 1;
+  uint64 score = 2;
+}
+
+message Block {
+  uint32 authority_index = 1;
+  repeated bytes transactions = 2;
+}
+
+message ConsensusOutput {
+  uint64 leader_round = 1;
+  uint32 leader_author_index = 2;
+  uint64 commit_timestamp = 3;
+  uint64 commit_sub_dag_index = 4;
+  bytes commit_digest = 5;
+  repeated ReputationScore reputation_scores = 6;
+  repeated Block blocks = 7;
+}

@@ -1350,21 +1350,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "consensus-common"
-version = "0.1.0"
-source = "git+https://github.com/scalarorg/common?branch=common_get_validator_info#a16d0e5bcabb018ca3447b2e89f60c0a45be4da5"
-dependencies = [
- "async-trait",
- "prost 0.12.6",
- "prost-build",
- "tokio",
- "tokio-stream",
- "tonic 0.11.0",
- "tonic-build",
- "vergen",
-]
-
-[[package]]
 name = "consensus-config"
 version = "0.1.0"
 source = "git+https://github.com/MystenLabs/sui?rev=14bc4d515100dfa8326e9f08b7e72335cf5467d7#14bc4d515100dfa8326e9f08b7e72335cf5467d7"
@@ -6415,7 +6400,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "scalaris-consensus"
+name = "scalaris"
 version = "0.1.0"
 dependencies = [
  "anemo",
@@ -6431,7 +6416,6 @@ dependencies = [
  "bytes",
  "chrono",
  "clap",
- "consensus-common",
  "consensus-config",
  "consensus-core",
  "dashmap",
@@ -6465,6 +6449,7 @@ dependencies = [
  "prometheus",
  "proptest",
  "proptest-derive",
+ "prost 0.12.6",
  "rand 0.8.5",
  "reqwest",
  "roaring",
@@ -6496,15 +6481,13 @@ dependencies = [
  "tokio",
  "tokio-stream",
  "tonic 0.11.0",
+ "tonic-build",
  "tower",
  "tracing",
  "typed-store",
  "typed-store-derive",
+ "vergen",
 ]
-
-[[package]]
-name = "scalaris-move"
-version = "0.0.0"
 
 [[package]]
 name = "schannel"

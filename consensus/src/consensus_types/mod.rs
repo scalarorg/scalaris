@@ -1,11 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
-use crate::consensus_service::ChainTransaction;
+use crate::ConsensusOutput;
 use address::AccountAddress;
 use base_types::ObjectID;
-use consensus_common::proto::CommitedTransactions;
-use messages_consensus::ConsensusTransaction;
-use serde::{Deserialize, Serialize};
 use std::pin::Pin;
 use sui_types::base_types::SequenceNumber;
 use tokio_stream::Stream;
@@ -31,15 +28,15 @@ pub use sui_types::object::OBJECT_START_VERSION;
 /// In Mysticeti, this is used the same way as the AuthorityIndex type there.
 pub type AuthorityIndex = u32;
 pub type ScalarisAddress = AccountAddress;
-pub type ConsensusStreamItem = Result<CommitedTransactions, Status>;
+pub type ConsensusStreamItem = Result<ConsensusOutput, Status>;
 pub type ConsensusServiceResult<T> = Result<Response<T>, Status>;
 pub type ResponseStream = Pin<Box<dyn Stream<Item = ConsensusStreamItem> + Send>>;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum InternalConsensusTransaction {
-    ExternalChain(ChainTransaction),
-    Consensus(ConsensusTransaction),
-}
+// #[derive(Debug, Clone, Serialize, Deserialize)]
+// pub enum InternalConsensusTransaction {
+//     ExternalChain(ChainTransaction),
+//     Consensus(ConsensusTransaction),
+// }
 
 const fn builtin_address(suffix: u16) -> AccountAddress {
     let mut addr = [0u8; AccountAddress::LENGTH];

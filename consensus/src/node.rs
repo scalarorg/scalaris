@@ -921,7 +921,7 @@ impl ConsensusNode {
             config.policy_config.clone(),
             config.firewall_config.clone(),
         );
-        let consensus_server = consensus_common::proto::ConsensusApiServer::new(consensus_service);
+        let consensus_server = crate::ConsensusApiServer::new(consensus_service);
         let mut server_conf = mysten_network::config::Config::new();
         server_conf.global_concurrency_limit = config.grpc_concurrency_limit;
         server_conf.load_shed = config.grpc_load_shed;

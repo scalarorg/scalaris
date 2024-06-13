@@ -12,6 +12,7 @@ pub mod epoch;
 pub mod metrics;
 pub mod node;
 pub mod post_consensus_tx_reorder;
+pub mod proto;
 pub mod scoring_decision;
 // pub mod signature_verifier;
 mod stake_aggregator;
@@ -21,7 +22,7 @@ use fastcrypto_zkp::bn254::zk_login::{JwkId, JWK};
 pub use node::ConsensusNode;
 pub use sui_config::NodeConfig;
 mod transaction_input_loader;
-
+pub use proto::{ConsensusApi, ConsensusApiServer, ConsensusOutput, ExternalTransaction};
 /*
 * Re export modules from sui_types
 */

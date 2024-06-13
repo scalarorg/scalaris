@@ -416,7 +416,7 @@ impl Message for RawData {
 
     fn digest(&self) -> Self::DigestType {
         let mut digest = DefaultHash::default();
-        digest.write(self.as_slice());
+        let _ = digest.write(self.as_slice());
         let hash = digest.finalize();
         TransactionDigest::new(hash.into())
     }
