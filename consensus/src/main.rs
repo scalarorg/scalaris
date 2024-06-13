@@ -1,9 +1,10 @@
 use clap::{ArgGroup, Parser};
 use mysten_common::sync::async_once_cell::AsyncOnceCell;
-use scalaris_consensus::{ConsensusNode, NodeConfig};
+use scalaris::{ConsensusNode, NodeConfig};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
+use sui_config::Config;
 use sui_types::committee::EpochId;
 use sui_types::messages_checkpoint::CheckpointSequenceNumber;
 use sui_types::multiaddr::Multiaddr;

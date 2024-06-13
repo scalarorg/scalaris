@@ -8,7 +8,7 @@ use crate::digests::ConsensusCommitDigest;
 use crate::messages_checkpoint::{
     CheckpointSequenceNumber, CheckpointSignatureMessage, CheckpointTimestamp,
 };
-use crate::transaction::{RawTransaction, TransactionData};
+use crate::transaction::RawTransaction;
 use byteorder::{BigEndian, ReadBytesExt};
 use fastcrypto::groups::bls12381;
 use fastcrypto_tbls::dkg;
@@ -20,7 +20,6 @@ use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::time::{SystemTime, UNIX_EPOCH};
 use sui_protocol_config::SupportedProtocolVersions;
-use sui_types::committee::EpochId;
 
 /// Only commit_timestamp_ms is passed to the move call currently.
 /// However we include epoch and round to make sure each ConsensusCommitPrologue has a unique tx digest.
