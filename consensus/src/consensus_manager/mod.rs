@@ -202,6 +202,7 @@ impl ConsensusManagerTrait for ConsensusManager {
         tx_validator: SuiTxValidator,
     ) {
         let protocol_manager = {
+            info!("Waiting for ConsensusManager active lock");
             let mut active = self.active.lock();
             active.iter().enumerate().for_each(|(index, active)| {
                 assert!(
@@ -224,7 +225,7 @@ impl ConsensusManagerTrait for ConsensusManager {
                 }
             }
         };
-
+        info!("Start protocol manager");
         protocol_manager
             .start(
                 node_config,
@@ -290,6 +291,7 @@ impl ConsensusClient {
     }
 
     pub fn set(&self, client: Arc<dyn SubmitToConsensus>) {
+        info!("Set consensus client");
         self.client.store(Some(Arc::new(client)));
     }
 

@@ -1,20 +1,19 @@
-# We generate the genesis blob and validator configurations
-from docker.io/mysten/sui-tools:mainnet-v1.19.1 as setup
+# Production Image
+FROM debian:bookworm-slim AS runtime
+# Use jemalloc as memory allocator
+RUN apt-get update && apt-get install -y libjemalloc-dev ca-certificates curl
+ENV LD_PRELOAD /usr/lib/x86_64-linux-gnu/libjemalloc.so
+ARG PROFILE=release
+WORKDIR "$WORKDIR/scalaris"
 
-RUN apt update
-RUN apt install python3 python3-pip -y
+# Both bench and release profiles copy from release dir
+#COPY --from=builder /scalaris/target/release/scalaris /opt/sui/bin/scalaris
+COPY target/release/scalaris /opt/scalaris/bin/scalaris
+# Support legacy usages of /usr/local/bin/scalaris
+#COPY --from=builder /scalaris/target/release/scalaris /usr/local/bin
+COPY target/release/scalaris /usr/local/bin
 
-# copy configuration files to root
-COPY ./new-genesis.sh /new-genesis.sh
-COPY ./genesis /genesis
-
-WORKDIR /
-
-RUN ./new-genesis.sh
-
-FROM scratch 
-
-COPY ./docker-compose.yaml /
-COPY /genesis/overlays/* /genesis/overlays/
-COPY /genesis/static/* /genesis/static/
-COPY --from=setup /genesis/files/* /genesis/files/
+ARG BUILD_DATE
+ARG GIT_REVISION
+LABEL build-date=$BUILD_DATE
+LABEL git-revision=$GIT_REVISION

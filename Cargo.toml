@@ -4,6 +4,190 @@ resolver = "2"
 members = [
     "consensus"
 ]
+exclude = [
+  "sui/",
+  "sui/external-crates/move/crates/bytecode-interpreter-crypto",
+  "sui/external-crates/move/crates/bytecode-interpreter-testsuite",
+  "sui/external-crates/move/crates/bytecode-verifier-libfuzzer",
+  "sui/external-crates/move/crates/bytecode-verifier-tests",
+  "sui/external-crates/move/crates/bytecode-verifier-transactional-tests",
+  "sui/external-crates/move/crates/enum-compat-util",
+  "sui/external-crates/move/crates/invalid-mutations",
+  "sui/external-crates/move/crates/language-benchmarks",
+  "sui/external-crates/move/crates/module-generation",
+  "sui/external-crates/move/crates/move-abstract-stack",
+  "sui/external-crates/move/crates/move-analyzer",
+  "sui/external-crates/move/crates/move-binary-format",
+  "sui/external-crates/move/crates/move-borrow-graph",
+  "sui/external-crates/move/crates/move-bytecode-source-map",
+  "sui/external-crates/move/crates/move-bytecode-utils",
+  "sui/external-crates/move/crates/move-bytecode-verifier",
+  "sui/external-crates/move/crates/move-bytecode-viewer",
+  "sui/external-crates/move/crates/move-cli",
+  "sui/external-crates/move/crates/move-command-line-common",
+  "sui/external-crates/move/crates/move-compiler",
+  "sui/external-crates/move/crates/move-compiler-transactional-tests",
+  "sui/external-crates/move/crates/move-core-types",
+  "sui/external-crates/move/crates/move-coverage",
+  "sui/external-crates/move/crates/move-disassembler",
+  "sui/external-crates/move/crates/move-docgen",
+  "sui/external-crates/move/crates/move-errmapgen",
+  "sui/external-crates/move/crates/move-explain",
+  "sui/external-crates/move/crates/move-ir-compiler",
+  "sui/external-crates/move/crates/move-ir-compiler-transactional-tests",
+  "sui/external-crates/move/crates/move-ir-to-bytecode",
+  "sui/external-crates/move/crates/move-ir-to-bytecode-syntax",
+  "sui/external-crates/move/crates/move-ir-types",
+  "sui/external-crates/move/crates/move-model",
+  "sui/external-crates/move/crates/move-package",
+  "sui/external-crates/move/crates/move-proc-macros",
+  "sui/external-crates/move/crates/move-prover",
+  "sui/external-crates/move/crates/move-prover-boogie-backend",
+  "sui/external-crates/move/crates/move-prover-test-utils",
+  "sui/external-crates/move/crates/move-read-write-set-types",
+  "sui/external-crates/move/crates/move-stackless-bytecode",
+  "sui/external-crates/move/crates/move-stackless-bytecode-interpreter",
+  "sui/external-crates/move/crates/move-stdlib",
+  "sui/external-crates/move/crates/move-symbol-pool",
+  "sui/external-crates/move/crates/move-transactional-test-runner",
+  "sui/external-crates/move/crates/move-unit-test",
+  "sui/external-crates/move/crates/move-vm-config",
+  "sui/external-crates/move/crates/move-vm-integration-tests",
+  "sui/external-crates/move/crates/move-vm-profiler",
+  "sui/external-crates/move/crates/move-vm-runtime",
+  "sui/external-crates/move/crates/move-vm-test-utils",
+  "sui/external-crates/move/crates/move-vm-transactional-tests",
+  "sui/external-crates/move/crates/move-vm-types",
+  "sui/external-crates/move/crates/prover-mutation",
+  "sui/external-crates/move/crates/serializer-tests",
+  "sui/external-crates/move/crates/spec-flatten",
+  "sui/external-crates/move/crates/test-generation",
+  "sui/external-crates/move/move-execution/next-vm/crates/move-bytecode-verifier",
+  "sui/external-crates/move/move-execution/next-vm/crates/move-stdlib",
+  "sui/external-crates/move/move-execution/next-vm/crates/move-vm-runtime",
+  "sui/external-crates/move/move-execution/v0/move-bytecode-verifier",
+  "sui/external-crates/move/move-execution/v0/move-stdlib",
+  "sui/external-crates/move/move-execution/v0/move-vm/runtime",
+  "sui/external-crates/move/move-execution/v1/crates/move-bytecode-verifier",
+  "sui/external-crates/move/move-execution/v1/crates/move-stdlib",
+  "sui/external-crates/move/move-execution/v1/crates/move-vm-runtime",
+  "sui/sdk/move-binary-format-wasm",
+  "sui/consensus/config",
+  "sui/consensus/core",
+  "sui/crates/anemo-benchmark",
+  "sui/crates/data-transform",
+  "sui/crates/mysten-common",
+  "sui/crates/mysten-metrics",
+  "sui/crates/mysten-network",
+  "sui/crates/mysten-util-mem",
+  "sui/crates/mysten-util-mem-derive",
+  "sui/crates/prometheus-closure-metric",
+  "sui/crates/shared-crypto",
+  "sui/crates/simulacrum",
+  "sui/crates/sui",
+  "sui/crates/sui-adapter-transactional-tests",
+  "sui/crates/sui-analytics-indexer",
+  "sui/crates/sui-analytics-indexer-derive",
+  "sui/crates/sui-archival",
+  "sui/crates/sui-authority-aggregation",
+  "sui/crates/sui-aws-orchestrator",
+  "sui/crates/sui-benchmark",
+  "sui/crates/sui-bridge",
+  "sui/crates/sui-cluster-test",
+  "sui/crates/sui-common",
+  "sui/crates/sui-config",
+  "sui/crates/sui-core",
+  "sui/crates/sui-cost",
+  "sui/crates/sui-data-ingestion",
+  "sui/crates/sui-e2e-tests",
+  "sui/crates/sui-enum-compat-util",
+  "sui/crates/sui-faucet",
+  "sui/crates/sui-framework",
+  "sui/crates/sui-framework-snapshot",
+  "sui/crates/sui-framework-tests",
+  "sui/crates/sui-genesis-builder",
+  "sui/crates/sui-graphql-e2e-tests",
+  "sui/crates/sui-graphql-rpc",
+  "sui/crates/sui-indexer",
+  "sui/crates/sui-json",
+  "sui/crates/sui-json-rpc",
+  "sui/crates/sui-json-rpc-api",
+  "sui/crates/sui-json-rpc-tests",
+  "sui/crates/sui-json-rpc-types",
+  "sui/crates/sui-keys",
+  "sui/crates/sui-kvstore",
+  "sui/crates/sui-macros",
+  "sui/crates/sui-metric-checker",
+  "sui/crates/sui-move",
+  "sui/crates/sui-move-build",
+  "sui/crates/sui-network",
+  "sui/crates/sui-node",
+  "sui/crates/sui-open-rpc",
+  "sui/crates/sui-open-rpc-macros",
+  "sui/crates/sui-oracle",
+  "sui/crates/sui-package-resolver",
+  "sui/crates/sui-proc-macros",
+  "sui/crates/sui-protocol-config",
+  "sui/crates/sui-protocol-config-macros",
+  "sui/crates/sui-proxy",
+  "sui/crates/sui-replay",
+  "sui/crates/sui-rest-api",
+  "sui/crates/sui-rosetta",
+  "sui/crates/sui-rpc-loadgen",
+  "sui/crates/sui-sdk",
+  "sui/crates/sui-simulator",
+  "sui/crates/sui-single-node-benchmark",
+  "sui/crates/sui-snapshot",
+  "sui/crates/sui-source-validation",
+  "sui/crates/sui-source-validation-service",
+  "sui/crates/sui-storage",
+  "sui/crates/sui-surfer",
+  "sui/crates/sui-swarm",
+  "sui/crates/sui-swarm-config",
+  "sui/crates/sui-telemetry",
+  "sui/crates/sui-test-transaction-builder",
+  "sui/crates/sui-test-validator",
+  "sui/crates/sui-tls",
+  "sui/crates/sui-tool",
+  "sui/crates/sui-transaction-builder",
+  "sui/crates/sui-transaction-checks",
+  "sui/crates/sui-transactional-test-runner",
+  "sui/crates/sui-types",
+  "sui/crates/sui-upgrade-compatibility-transactional-tests",
+  "sui/crates/sui-verifier-transactional-tests",
+  "sui/crates/telemetry-subscribers",
+  "sui/crates/test-cluster",
+  "sui/crates/transaction-fuzzer",
+  "sui/crates/typed-store",
+  "sui/crates/typed-store-derive",
+  "sui/crates/typed-store-error",
+  "sui/crates/workspace-hack",
+  "sui/crates/x",
+  "sui/narwhal/config",
+  "sui/narwhal/crypto",
+  "sui/narwhal/executor",
+  "sui/narwhal/network",
+  "sui/narwhal/node",
+  "sui/narwhal/primary",
+  "sui/narwhal/storage",
+  "sui/narwhal/test-utils",
+  "sui/narwhal/types",
+  "sui/narwhal/worker",
+  "sui/sui-execution",
+  "sui/sui-execution/cut",
+  "sui/sui-execution/latest/sui-adapter",
+  "sui/sui-execution/latest/sui-move-natives",
+  "sui/sui-execution/latest/sui-verifier",
+  "sui/sui-execution/next-vm/sui-adapter",
+  "sui/sui-execution/next-vm/sui-move-natives",
+  "sui/sui-execution/next-vm/sui-verifier",
+  "sui/sui-execution/v0/sui-adapter",
+  "sui/sui-execution/v0/sui-move-natives",
+  "sui/sui-execution/v0/sui-verifier",
+  "sui/sui-execution/v1/sui-adapter",
+  "sui/sui-execution/v1/sui-move-natives",
+  "sui/sui-execution/v1/sui-verifier",
+]
 
 [workspace.package]
 version = "0.1.0"
@@ -18,7 +202,9 @@ anemo-tower = { git = "https://github.com/mystenlabs/anemo.git", rev = "26d415eb
 fastcrypto = { git = "https://github.com/MystenLabs/fastcrypto", rev = "c101a5176799db3eb9c801b844e7add92153d291" }
 fastcrypto-tbls = { git = "https://github.com/MystenLabs/fastcrypto", rev = "c101a5176799db3eb9c801b844e7add92153d291" }
 fastcrypto-zkp = { git = "https://github.com/MystenLabs/fastcrypto", rev = "c101a5176799db3eb9c801b844e7add92153d291", package = "fastcrypto-zkp" }
+
 # MystenLabs consensus 2.0 bases on Mysticeti version Jun 01, 2024
+bin-version = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "bin-version" }
 consensus-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "consensus-config" }
 consensus-core = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "consensus-core" }
 shared-crypto = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "shared-crypto" }
@@ -36,10 +222,9 @@ sui-swarm-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515
 sui-tls = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-tls" }
 sui-types = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-types" }
 telemetry-subscribers = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "telemetry-subscribers" }
-
 typed-store = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "typed-store" }
 typed-store-derive = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "typed-store-derive" }
-bin-version = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "bin-version" }
+
 # For narwhal support
 narwhal-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-config" }
 narwhal-crypto = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-crypto" }
@@ -49,6 +234,37 @@ narwhal-node = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100d
 narwhal-types = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-types" }
 narwhal-worker = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-worker" }
 narwhal-test-utils = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-test-utils" }
+
+
+#consensus-config = { path = "../sui/consensus/config", package = "consensus-config" }
+#consensus-core = { path = "../sui/consensus/core", package = "consensus-core" }
+#shared-crypto = { path = "../sui/crates/shared-crypto", package = "shared-crypto" }
+#mysten-common = { path = "../sui/crates/mysten-common", package = "mysten-common" }
+#mysten-metrics = { path = "../sui/crates/mysten-metrics", package = "mysten-metrics" }
+#mysten-network = { path = "../sui/crates/mysten-network", package = "mysten-network" }
+#sui-archival = { path = "../sui/crates/sui-archival", package = "sui-archival" }
+#sui-config = { path = "../sui/crates/sui-config", package = "sui-config" }
+#sui-core = { path = "../sui/crates/sui-core", package = "sui-core" }
+#sui-protocol-config = { path = "../sui/crates/sui-protocol-config", package = "sui-protocol-config" }
+#sui-macros = { path = "../sui/crates/sui-macros", package = "sui-macros" }
+#sui-network = { path = "../sui/crates/sui-network", package = "sui-network" }
+#sui-storage = { path = "../sui/crates/sui-storage", package = "sui-storage" }
+#sui-swarm-config = { path = "../sui/crates/sui-swarm-config", package = "sui-swarm-config" }
+#sui-tls = { path = "../sui/crates/sui-tls", package = "sui-tls" }
+#sui-types = { path = "../sui/crates/sui-types", package = "sui-types" }
+#telemetry-subscribers = { path = "../sui/crates/telemetry-subscribers", package = "telemetry-subscribers" }
+#typed-store = { path = "../sui/crates/typed-store", package = "typed-store" }
+#typed-store-derive = { path = "../sui/crates/typed-store-derive", package = "typed-store-derive" }
+#bin-version = { path = "../sui/crates/bin-version", package = "bin-version" }
+# For narwhal support
+#narwhal-config = { path = "../sui/narwhal/config", package = "narwhal-config" }
+#narwhal-crypto = { path = "../sui/narwhal/crypto", package = "narwhal-crypto" }
+#narwhal-executor = { path = "../sui/narwhal/executor", package = "narwhal-executor" }
+#narwhal-network = { path = "../sui/narwhal/network", package = "narwhal-network" }
+#narwhal-node = { path = "../sui/narwhal/node", package = "narwhal-node" }
+#narwhal-types = { path = "../sui/narwhal/types", package = "narwhal-types" }
+#narwhal-worker = { path = "../sui/narwhal/worker", package = "narwhal-worker" }
+#narwhal-test-utils = { path = "../sui/narwhal/test-utils", package = "narwhal-test-utils" }
 
 anyhow = "1.0.71"
 arbitrary = { version = "1.1.7", features = ["derive", "derive_arbitrary"] }

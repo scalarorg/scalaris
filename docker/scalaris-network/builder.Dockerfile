@@ -8,9 +8,9 @@ ARG GIT_REVISION
 ENV GIT_REVISION=$GIT_REVISION
 WORKDIR "$WORKDIR/scalaris"
 RUN apt-get update && apt-get install -y cmake clang protobuf-compiler
-
 COPY Cargo.toml Cargo.lock ./
-COPY consensus consensus
+COPY consensus ./consensus
+
 RUN cargo build --profile ${PROFILE} --bin scalaris
 
 # Production Image
@@ -21,9 +21,9 @@ ENV LD_PRELOAD /usr/lib/x86_64-linux-gnu/libjemalloc.so
 ARG PROFILE=release
 WORKDIR "$WORKDIR/scalaris"
 # Both bench and release profiles copy from release dir
-COPY --from=builder /sui/target/release/scalaris /opt/sui/bin/scalaris
+COPY --from=builder /scalaris/target/release/scalaris /opt/sui/bin/scalaris
 # Support legacy usages of /usr/local/bin/scalaris
-COPY --from=builder /sui/target/release/scalaris /usr/local/bin
+COPY --from=builder /scalaris/target/release/scalaris /usr/local/bin
 
 ARG BUILD_DATE
 ARG GIT_REVISION
