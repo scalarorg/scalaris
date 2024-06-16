@@ -5,12 +5,14 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 use sui_config::Config;
+use sui_protocol_config::SupportedProtocolVersions;
 use sui_types::committee::EpochId;
 use sui_types::messages_checkpoint::CheckpointSequenceNumber;
 use sui_types::multiaddr::Multiaddr;
-use tokio::runtime;
+use tokio::runtime::{self, Runtime};
 use tokio::sync::broadcast;
-use tracing::error;
+use tracing::{error, info};
+
 // Define the `GIT_REVISION` and `VERSION` consts
 bin_version::bin_version!();
 
@@ -35,16 +37,41 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let mut config = NodeConfig::load(&args.config_path).unwrap();
+    assert!(
+        config.supported_protocol_versions.is_none(),
+        "supported_protocol_versions cannot be read from the config file"
+    );
+    config.supported_protocol_versions = Some(SupportedProtocolVersions::SYSTEM_DEFAULT);
+
+    let (consensus, metrics) = create_runtimes(&config);
+    //Start metrics service
+    let metrics_rt = metrics.enter();
+    let registry_service = mysten_metrics::start_prometheus_server(config.metrics_address);
+    let prometheus_registry = registry_service.default_registry();
+
+    // Initialize logging
+    let (_guard, filter_handle) = telemetry_subscribers::TelemetryConfig::new()
+        .with_env()
+        .with_prom_registry(&prometheus_registry)
+        .init();
+
+    drop(metrics_rt);
+    info!("Scalaris Node version: {VERSION}");
+    info!(
+        "Supported protocol versions: {:?}",
+        config.supported_protocol_versions
+    );
+
+    info!(
+        "Started Prometheus HTTP endpoint at {}",
+        config.metrics_address
+    );
+
     let node_once_cell = Arc::new(AsyncOnceCell::<Arc<ConsensusNode>>::new());
     let node_once_cell_clone = node_once_cell.clone();
-    let runtime = runtime::Builder::new_multi_thread()
-        .thread_name("scalaris-consensus-runtime")
-        .enable_all()
-        .build()
-        .unwrap();
-    let registry_service = mysten_metrics::start_prometheus_server(config.metrics_address);
     let (runtime_shutdown_tx, runtime_shutdown_rx) = broadcast::channel::<()>(1);
-    runtime.spawn(async move {
+
+    consensus.spawn(async move {
         match ConsensusNode::start(config, registry_service).await {
             Ok(node) => node_once_cell_clone
                 .set(node)
@@ -77,6 +104,21 @@ fn main() {
         .build()
         .unwrap()
         .block_on(wait_termination(runtime_shutdown_rx));
+}
+
+fn create_runtimes(_config: &NodeConfig) -> (Runtime, Runtime) {
+    let consensus = runtime::Builder::new_multi_thread()
+        .thread_name("scalaris-consensus-runtime")
+        .enable_all()
+        .build()
+        .unwrap();
+    let metrics = tokio::runtime::Builder::new_multi_thread()
+        .thread_name("metrics-runtime")
+        .worker_threads(2)
+        .enable_all()
+        .build()
+        .unwrap();
+    (consensus, metrics)
 }
 
 #[cfg(not(unix))]

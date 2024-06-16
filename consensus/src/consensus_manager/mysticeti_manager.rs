@@ -162,7 +162,15 @@ impl ConsensusManagerTrait for MysticetiManager {
 
         self.authority
             .swap(Some(Arc::new((authority, registry_id))));
-
+        // create the client to send transactions to Mysticeti and update it.
+        self.client.set(
+            self.authority
+                .load()
+                .as_ref()
+                .expect("ConsensusAuthority should have been created by now.")
+                .0
+                .transaction_client(),
+        );
         // spin up the new mysticeti consensus handler to listen for committed sub dags
         let handler = MysticetiConsensusHandler::new(consensus_handler, commit_receiver);
         let mut consensus_handler = self.consensus_handler.lock().await;

@@ -250,6 +250,7 @@ impl ConsensusNode {
     ) -> Result<Arc<ConsensusNode>> {
         NodeConfigMetrics::new(&registry_service.default_registry()).record_metrics(&config);
         let mut config = config.clone();
+        debug!("Start consensus node with config {:?}", &config);
         let prometheus_registry = registry_service.default_registry();
         // Initialize metrics to track db usage before creating any stores
         DBMetrics::init(&prometheus_registry);
@@ -453,9 +454,9 @@ impl ConsensusNode {
         RandomnessRoundReceiver::spawn(state.clone(), randomness_rx);
         // let (end_of_epoch_channel, end_of_epoch_receiver) =
         //     broadcast::channel(config.end_of_epoch_broadcast_channel_capacity);
-        let accumulator = Arc::new(StateAccumulator::new(
-            cache_traits.accumulator_store.clone(),
-        ));
+        // let accumulator = Arc::new(StateAccumulator::new(
+        //     cache_traits.accumulator_store.clone(),
+        // ));
 
         let authority_names_to_peer_ids = epoch_store
             .epoch_start_state()
@@ -490,13 +491,12 @@ impl ConsensusNode {
             checkpoint_store.clone(),
             // state_sync_handle.clone(),
             randomness_handle.clone(),
-            accumulator.clone(),
+            //accumulator.clone(),
             connection_monitor_status.clone(),
             &registry_service,
             sui_node_metrics.clone(),
         )
         .await?;
-
         let (shutdown_channel, _) = broadcast::channel::<Option<RunWithRange>>(1);
         let node = Self {
             config,
@@ -509,7 +509,7 @@ impl ConsensusNode {
             //connection_monitor_status,
             shutdown_channel_tx: shutdown_channel,
         };
-        info!("SuiNode started!");
+        info!("ScalarisNode started!");
         let node = Arc::new(node);
         let node_copy = node.clone();
         // spawn_monitored_task!(async move {
@@ -666,7 +666,7 @@ impl ConsensusNode {
         checkpoint_store: Arc<CheckpointStore>,
         // state_sync_handle: state_sync::Handle,
         randomness_handle: randomness::Handle,
-        accumulator: Arc<StateAccumulator>,
+        // accumulator: Arc<StateAccumulator>,
         connection_monitor_status: Arc<ConnectionMonitorStatus>,
         registry_service: &RegistryService,
         sui_node_metrics: Arc<SuiNodeMetrics>,
@@ -700,7 +700,7 @@ impl ConsensusNode {
         let checkpoint_metrics = CheckpointMetrics::new(&registry_service.default_registry());
         let sui_tx_validator_metrics =
             TxValidatorMetrics::new(&registry_service.default_registry());
-
+        info!("Start grpc consensus service");
         let validator_server_handle = Self::start_grpc_consensus_service(
             &config,
             state.clone(),
@@ -740,7 +740,7 @@ impl ConsensusNode {
             randomness_handle,
             consensus_manager,
             consensus_epoch_data_remover,
-            accumulator,
+            // accumulator,
             validator_server_handle,
             validator_overload_monitor_handle,
             checkpoint_metrics,
@@ -761,13 +761,14 @@ impl ConsensusNode {
         randomness_handle: randomness::Handle,
         consensus_manager: ConsensusManager,
         consensus_epoch_data_remover: EpochDataRemover,
-        accumulator: Arc<StateAccumulator>,
+        // accumulator: Arc<StateAccumulator>,
         validator_server_handle: JoinHandle<Result<()>>,
         validator_overload_monitor_handle: Option<JoinHandle<()>>,
         checkpoint_metrics: Arc<CheckpointMetrics>,
         sui_node_metrics: Arc<SuiNodeMetrics>,
         tx_validator_metrics: Arc<TxValidatorMetrics>,
     ) -> Result<NodeComponents> {
+        info!("Start epoch consensus components");
         // CheckpointService in the
         // https://docs.sui.io/concepts/cryptography/system/checkpoint-verification
         let (checkpoint_service, checkpoint_service_exit) =
@@ -779,21 +780,6 @@ impl ConsensusNode {
         let low_scoring_authorities = Arc::new(ArcSwap::new(Arc::new(HashMap::new())));
 
         //consensus_adapter.swap_low_scoring_authorities(low_scoring_authorities.clone());
-
-        if epoch_store.randomness_state_enabled() {
-            let randomness_manager = RandomnessManager::try_new(
-                Arc::downgrade(&epoch_store),
-                consensus_client.clone(),
-                randomness_handle,
-                config.protocol_key_pair(),
-            )
-            .await;
-            if let Some(randomness_manager) = randomness_manager {
-                epoch_store
-                    .set_randomness_manager(randomness_manager)
-                    .await?;
-            }
-        }
 
         let throughput_calculator = Arc::new(ConsensusThroughputCalculator::new(
             None,
@@ -818,7 +804,7 @@ impl ConsensusNode {
             low_scoring_authorities,
             throughput_calculator,
         );
-
+        info!("Start consensus manager");
         consensus_manager
             .start(
                 config,
@@ -832,6 +818,21 @@ impl ConsensusNode {
             )
             .await;
 
+        if epoch_store.randomness_state_enabled() {
+            info!("Create randomness manager");
+            let randomness_manager = RandomnessManager::try_new(
+                Arc::downgrade(&epoch_store),
+                consensus_client.clone(),
+                randomness_handle,
+                config.protocol_key_pair(),
+            )
+            .await;
+            if let Some(randomness_manager) = randomness_manager {
+                epoch_store
+                    .set_randomness_manager(randomness_manager)
+                    .await?;
+            }
+        }
         if epoch_store.authenticator_state_enabled() {
             Self::start_jwk_updater(
                 config,
