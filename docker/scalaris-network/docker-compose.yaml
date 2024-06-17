@@ -23,6 +23,8 @@ services:
         "--config-path",
         "/opt/scalaris/config/validator.yaml",
       ]
+    ports:
+      - "8081:8080"
     restart: on-failure
     logging:
       driver: "json-file"
@@ -51,6 +53,8 @@ services:
         "--config-path",
         "/opt/scalaris/config/validator.yaml",
       ]
+    ports:
+      - "8082:8080"  
     restart: on-failure
     logging:
       driver: "json-file"
@@ -79,6 +83,8 @@ services:
         "--config-path",
         "/opt/scalaris/config/validator.yaml",
       ]
+    ports:
+      - "8083:8080"  
     restart: on-failure
     logging:
       driver: "json-file"
@@ -107,6 +113,8 @@ services:
         "--config-path",
         "/opt/scalaris/config/validator.yaml",
       ]
+    ports:
+      - "8084:8080"  
     restart: on-failure
     logging:
       driver: "json-file"
