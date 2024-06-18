@@ -6,6 +6,7 @@ use crate::proto::{
 };
 use anyhow::{anyhow, Result};
 use mysten_metrics::histogram::Histogram as MystenHistogram;
+use mysten_metrics::spawn_monitored_task;
 use narwhal_types::Transaction;
 use prometheus::{
     register_int_counter_vec_with_registry, register_int_counter_with_registry, IntCounter,
@@ -378,10 +379,17 @@ impl ConsensusService {
                 },
             )
             .collect::<Vec<Vec<u8>>>();
-        self.consensus_client
-            .submit_raw_transactions(raw_transactions)
-            .await
-            .map_err(|err| anyhow!(err.to_string()))
+        let client = self.consensus_client.clone();
+        spawn_monitored_task!(async move {
+            if let Err(err) = client
+                .submit_raw_transactions(raw_transactions)
+                .await
+                .map_err(|err| anyhow!(err))
+            {
+                error!("Submit raw transaction with error {:?}", &err);
+            }
+        });
+        Ok(())
     }
 }
 
