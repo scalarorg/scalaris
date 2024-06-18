@@ -6408,6 +6408,7 @@ dependencies = [
  "anyhow",
  "arbitrary",
  "arc-swap",
+ "async-stream",
  "async-trait",
  "axum",
  "bcs",

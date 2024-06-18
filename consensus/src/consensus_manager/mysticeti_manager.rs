@@ -25,6 +25,7 @@ use sui_types::{
     committee::EpochId, sui_system_state::epoch_start_sui_system_state::EpochStartSystemStateTrait,
 };
 use tokio::sync::Mutex;
+use tracing::info;
 
 #[cfg(test)]
 #[path = "../unit_tests/mysticeti_manager_tests.rs"]
@@ -144,6 +145,10 @@ impl ConsensusManagerTrait for MysticetiManager {
 
         // TODO(mysticeti): Investigate if we need to return potential errors from
         // AuthorityNode and add retries here?
+        info!(
+            "Create consensus authority with network {:?}",
+            &network_type
+        );
         let authority = ConsensusAuthority::start(
             network_type,
             own_index,
@@ -157,20 +162,13 @@ impl ConsensusManagerTrait for MysticetiManager {
             registry.clone(),
         )
         .await;
-
+        let transaction_client = authority.transaction_client();
         let registry_id = self.registry_service.add(registry.clone());
 
         self.authority
             .swap(Some(Arc::new((authority, registry_id))));
         // create the client to send transactions to Mysticeti and update it.
-        self.client.set(
-            self.authority
-                .load()
-                .as_ref()
-                .expect("ConsensusAuthority should have been created by now.")
-                .0
-                .transaction_client(),
-        );
+        self.client.set(transaction_client);
         // spin up the new mysticeti consensus handler to listen for committed sub dags
         let handler = MysticetiConsensusHandler::new(consensus_handler, commit_receiver);
         let mut consensus_handler = self.consensus_handler.lock().await;

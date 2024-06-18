@@ -13,7 +13,7 @@ use std::{
 use sui_types::error::{SuiError, SuiResult};
 use tap::prelude::*;
 use tokio::time::{sleep, timeout};
-use tracing::warn;
+use tracing::{info, warn};
 
 #[mockall::automock]
 #[async_trait::async_trait]
@@ -94,8 +94,7 @@ impl SubmitToConsensus for LazyMysticetiClient {
                 // Will be logged by caller as well.
                 warn!("Submit transactions failed with: {:?}", r);
             })
-            .map_err(|err| SuiError::FailedToSubmitToConsensus(err.to_string()))?;
-        Ok(())
+            .map_err(|err| SuiError::FailedToSubmitToConsensus(err.to_string()))
     }
     async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
         let transactions = transactions
@@ -114,7 +113,12 @@ impl SubmitToConsensus for LazyMysticetiClient {
                 ConsensusTransaction { tracking_id, kind }
             })
             .collect::<Vec<ConsensusTransaction>>();
-        self.submit_to_consensus(transactions.as_slice()).await
+        let res = self.submit_to_consensus(transactions.as_slice()).await;
+        info!(
+            "LazyMysticetiClient::submit_raw_transaction result {:?}",
+            &res
+        );
+        return res;
     }
 }
 
