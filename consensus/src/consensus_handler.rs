@@ -219,8 +219,9 @@ impl<C> ConsensusHandler<C> {
         consensus_listener: Arc<ConsensusListener>,
     ) {
         while let Some(consensus_out) = recv.recv().await {
+            info!("Handle consensus output {:?}", &consensus_out);
             let _guard = monitored_scope("ConsensusHandler::enqueue");
-            consensus_listener.notify(consensus_out);
+            consensus_listener.notify(consensus_out).await;
         }
     }
     // async fn schedule(&self, consensus_output: ProtoConsensusOutput) {

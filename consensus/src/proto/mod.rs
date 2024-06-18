@@ -1,4 +1,4 @@
-mod service;
+pub mod service;
 mod types;
 use consensus_core::BlockAPI;
 use fastcrypto::hash::Hash;
