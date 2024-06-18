@@ -14,14 +14,14 @@ services:
       - RUST_LOG=info,sui_core=debug,sui_network=debug,sui_node=debug,narwhal=debug,narwhal-primary::helper=info,jsonrpsee=error
       - RPC_WORKER_THREAD=12
     volumes:
-      - ./genesis/files/validator1-8080.yaml:/opt/scalaris/config/validator.yaml:ro
+      - ./genesis/files/scalaris1-8080.yaml:/opt/scalaris/config/scalaris.yaml:ro
       - ./genesis/files/genesis.blob:/opt/scalaris/config/genesis.blob:ro
       - /tmp/scalaris/db1:/opt/scalaris/db:rw
     command: 
       [
         "/usr/local/bin/scalaris",
         "--config-path",
-        "/opt/scalaris/config/validator.yaml",
+        "/opt/scalaris/config/scalaris.yaml",
       ]
     ports:
       - "8081:8080"
@@ -44,14 +44,14 @@ services:
       - RUST_LOG=info,sui_core=debug,sui_network=debug,sui_node=debug,narwhal=debug,narwhal-primary::helper=info,jsonrpsee=error
       - RPC_WORKER_THREAD=12
     volumes:
-      - ./genesis/files/validator2-8080.yaml:/opt/scalaris/config/validator.yaml:ro
+      - ./genesis/files/scalaris2-8080.yaml:/opt/scalaris/config/scalaris.yaml:ro
       - ./genesis/files/genesis.blob:/opt/scalaris/config/genesis.blob:ro
       - /tmp/scalaris/db2:/opt/scalaris/db:rw
     command:
       [
         "/usr/local/bin/scalaris",
         "--config-path",
-        "/opt/scalaris/config/validator.yaml",
+        "/opt/scalaris/config/scalaris.yaml",
       ]
     ports:
       - "8082:8080"  
@@ -74,14 +74,14 @@ services:
       - RUST_LOG=info,sui_core=debug,sui_network=debug,sui_node=debug,narwhal=debug,narwhal-primary::helper=info,jsonrpsee=error
       - RPC_WORKER_THREAD=12
     volumes:
-      - ./genesis/files/validator3-8080.yaml:/opt/scalaris/config/validator.yaml:ro
+      - ./genesis/files/scalaris3-8080.yaml:/opt/scalaris/config/scalaris.yaml:ro
       - ./genesis/files/genesis.blob:/opt/scalaris/config/genesis.blob:ro
       - /tmp/scalaris/db3:/opt/scalaris/db:rw
     command: 
       [
         "/usr/local/bin/scalaris",
         "--config-path",
-        "/opt/scalaris/config/validator.yaml",
+        "/opt/scalaris/config/scalaris.yaml",
       ]
     ports:
       - "8083:8080"  
@@ -104,14 +104,14 @@ services:
       - RUST_LOG=info,sui_core=debug,sui_network=debug,sui_node=debug,narwhal=debug,narwhal-primary::helper=info,jsonrpsee=error
       - RPC_WORKER_THREAD=12
     volumes:
-      - ./genesis/files/validator4-8080.yaml:/opt/scalaris/config/validator.yaml:ro
+      - ./genesis/files/scalaris4-8080.yaml:/opt/scalaris/config/scalaris.yaml:ro
       - ./genesis/files/genesis.blob:/opt/scalaris/config/genesis.blob:ro
       - /tmp/scalaris/db4:/opt/scalaris/db:rw
     command: 
       [
         "/usr/local/bin/scalaris",
         "--config-path",
-        "/opt/scalaris/config/validator.yaml",
+        "/opt/scalaris/config/scalaris.yaml",
       ]
     ports:
       - "8084:8080"  
