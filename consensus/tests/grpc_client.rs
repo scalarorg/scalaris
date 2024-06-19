@@ -46,7 +46,7 @@ mod tests {
                     match received {
                         Ok(grpc_output) => {
                             let consensus_output: ConsensusOutput = grpc_output.into();
-                            println!("Consenssu output {:?}", &consensus_output);
+                            println!("Consensus output {:?}", &consensus_output);
                             // consensus_handler
                             //     .handle_scalaris_ouput(consensus_output)
                             //     .await;
@@ -63,6 +63,7 @@ mod tests {
                 let onehundred_millis = time::Duration::from_millis(1000);
                 let _now = time::Instant::now();
                 sleep(onehundred_millis).await;
+                break;
             }
         } else {
             println!(
