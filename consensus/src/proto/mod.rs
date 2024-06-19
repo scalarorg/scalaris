@@ -9,7 +9,10 @@ pub use types::{
     ValidatorInfo, ValidatorState,
 };
 
-use crate::consensus_types::{consensus_output_api::ConsensusOutputAPI, AuthorityIndex};
+use crate::{
+    consensus_types::{consensus_output_api::ConsensusOutputAPI, AuthorityIndex},
+    messages_consensus::ConsensusTransaction,
+};
 
 impl From<narwhal_types::ConsensusOutput> for ConsensusOutput {
     fn from(value: narwhal_types::ConsensusOutput) -> Self {
@@ -44,13 +47,17 @@ impl From<narwhal_types::ConsensusOutput> for ConsensusOutput {
             .map(|(cert, batches)| {
                 assert_eq!(cert.header().payload().len(), batches.len());
                 let transactions: Vec<Vec<u8>> = batches
-                    .iter()
+                    .into_iter()
                     .flat_map(|batch| {
                         let digest = batch.digest();
                         assert!(cert.header().payload().contains_key(&digest));
                         //Transactions come to the consensus in format ChainTransaction {chain_id, transaction: Vec<u8>}
                         //Extract transaction part from batch
-                        batch.transactions().clone()
+                        batch
+                            .transactions()
+                            .iter()
+                            .flat_map(|tx| extract_raw_transaction(tx.as_slice()))
+                            .collect::<Vec<Vec<u8>>>()
                     })
                     .collect();
                 Block {
@@ -96,7 +103,7 @@ impl From<consensus_core::CommittedSubDag> for ConsensusOutput {
                 let transactions = block
                     .transactions()
                     .iter()
-                    .map(|tx| tx.data().to_vec())
+                    .filter_map(|tx| extract_raw_transaction(tx.data()).ok())
                     .collect();
                 Block {
                     authority_index,
@@ -105,5 +112,22 @@ impl From<consensus_core::CommittedSubDag> for ConsensusOutput {
             })
             .collect();
         consensus_output
+    }
+}
+
+fn extract_raw_transaction(transactions: &[u8]) -> anyhow::Result<Vec<u8>> {
+    let consensus_tx: ConsensusTransaction = bcs::from_bytes(transactions)?;
+    match consensus_tx.kind {
+        crate::messages_consensus::ConsensusTransactionKind::UserTransaction(user_tx) => {
+            match user_tx.as_ref().clone() {
+                crate::messages_consensus::UserTransaction::RawTransaction(raw_tx) => {
+                    return Ok(raw_tx.into_data());
+                }
+                crate::messages_consensus::UserTransaction::CertifiedTransaction(_) => {
+                    return Ok(transactions.to_vec())
+                }
+            }
+        }
+        _ => return Ok(transactions.to_vec()),
     }
 }
