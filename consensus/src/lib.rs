@@ -1,6 +1,5 @@
 pub mod authority;
 pub mod checkpoints;
-// pub(crate) mod config;
 pub mod consensus_client;
 pub mod consensus_handler;
 pub mod consensus_manager;
@@ -18,7 +17,6 @@ pub mod scoring_decision;
 mod stake_aggregator;
 // pub mod storage;
 pub(crate) use consensus_types::{message_envelope, messages_consensus, transaction};
-use fastcrypto_zkp::bn254::zk_login::{JwkId, JWK};
 pub use node::ConsensusNode;
 pub use sui_config::NodeConfig;
 mod transaction_input_loader;

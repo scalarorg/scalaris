@@ -22,6 +22,7 @@ mod tests {
                 if let Ok(client) = ConsensusApiClient::connect(CONSENSUS_ADDR).await {
                     return client;
                 } else {
+                    println!("Cannot connect to the consensus grpc server");
                     sleep(RETRY_INTERVAL).await;
                 }
             }

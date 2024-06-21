@@ -1,7 +1,3 @@
-use crate::{
-    messages_consensus::{ConsensusTransaction, ConsensusTransactionKind, UserTransaction},
-    transaction::{RawData, RawTransaction},
-};
 use arc_swap::{ArcSwapOption, Guard};
 use consensus_core::TransactionClient;
 pub use narwhal_worker::LazyNarwhalClient;
@@ -13,13 +9,32 @@ use std::{
 use sui_types::error::{SuiError, SuiResult};
 use tap::prelude::*;
 use tokio::time::{sleep, timeout};
-use tracing::{info, warn};
+use tracing::{debug, warn};
+
+use crate::{
+    consensus_service::ChainTransaction, consensus_types::InternalConsensusTransaction,
+    messages_consensus::ConsensusTransaction, transaction::RawData,
+};
 
 #[mockall::automock]
 #[async_trait::async_trait]
 pub trait SubmitToConsensus: Sync + Send + 'static {
-    async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult;
-    async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult;
+    async fn submit_raw_transactions(&self, transactions: Vec<Vec<u8>>) -> SuiResult;
+    async fn submit_consensus_transaction(&self, transaction: ConsensusTransaction) -> SuiResult {
+        let raw_transactions = bcs::to_bytes(&InternalConsensusTransaction::Consensus(transaction))
+            .expect("Serializing consensus transaction cannot fail");
+        self.submit_raw_transactions(vec![raw_transactions]).await
+    }
+    async fn submit_chain_transactions(&self, transactions: Vec<ChainTransaction>) -> SuiResult {
+        let raw_transactions = transactions
+            .into_iter()
+            .map(|t| {
+                bcs::to_bytes(&InternalConsensusTransaction::ExternalChain(t))
+                    .expect("Serializing consensus transaction cannot fail")
+            })
+            .collect::<Vec<_>>();
+        self.submit_raw_transactions(raw_transactions).await
+    }
 }
 
 /// Basically a wrapper struct that reads from the LOCAL_MYSTICETI_CLIENT variable where the latest
@@ -76,45 +91,39 @@ impl LazyMysticetiClient {
 
 #[async_trait::async_trait]
 impl SubmitToConsensus for LazyMysticetiClient {
-    async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
-        // TODO(mysticeti): confirm comment is still true
-        // The retrieved TransactionClient can be from the past epoch. Submit would fail after
-        // Mysticeti shuts down, so there should be no correctness issue.
-        let transactions_bytes = transactions
-            .iter()
-            .map(|t| bcs::to_bytes(t).expect("Serializing consensus transaction cannot fail"))
-            .collect::<Vec<_>>();
+    // async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
+    //     // TODO(mysticeti): confirm comment is still true
+    //     // The retrieved TransactionClient can be from the past epoch. Submit would fail after
+    //     // Mysticeti shuts down, so there should be no correctness issue.
+    //     let transactions_bytes = transactions
+    //         .iter()
+    //         .map(|t| bcs::to_bytes(t).expect("Serializing consensus transaction cannot fail"))
+    //         .collect::<Vec<_>>();
+    //     let client = self.get().await;
+    //     client
+    //         .as_ref()
+    //         .expect("Client should always be returned")
+    //         .submit(transactions_bytes)
+    //         .await
+    //         .tap_err(|r| {
+    //             // Will be logged by caller as well.
+    //             warn!("Submit transactions failed with: {:?}", r);
+    //         })
+    //         .map_err(|err| SuiError::FailedToSubmitToConsensus(err.to_string()))
+    // }
+    async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
         let client = self.get().await;
-        client
+        let res = client
             .as_ref()
             .expect("Client should always be returned")
-            .submit(transactions_bytes)
+            .submit(transactions)
             .await
             .tap_err(|r| {
                 // Will be logged by caller as well.
                 warn!("Submit transactions failed with: {:?}", r);
             })
-            .map_err(|err| SuiError::FailedToSubmitToConsensus(err.to_string()))
-    }
-    async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
-        let transactions = transactions
-            .into_iter()
-            .map(|raw_data| {
-                let mut hasher = DefaultHasher::new();
-                hasher.write(raw_data.as_slice());
-                let tracking_id = hasher.finish().to_le_bytes();
-                let raw_tx = RawTransaction::new_from_data_and_sig(
-                    raw_data,
-                    sui_types::crypto::EmptySignInfo {},
-                );
-                let kind = ConsensusTransactionKind::UserTransaction(Box::new(
-                    UserTransaction::RawTransaction(raw_tx),
-                ));
-                ConsensusTransaction { tracking_id, kind }
-            })
-            .collect::<Vec<ConsensusTransaction>>();
-        let res = self.submit_to_consensus(transactions.as_slice()).await;
-        info!(
+            .map_err(|err| SuiError::FailedToSubmitToConsensus(err.to_string()));
+        debug!(
             "LazyMysticetiClient::submit_raw_transaction result {:?}",
             &res
         );
@@ -124,13 +133,50 @@ impl SubmitToConsensus for LazyMysticetiClient {
 
 #[async_trait::async_trait]
 impl SubmitToConsensus for LazyNarwhalClient {
-    async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
-        let transactions = transactions
-            .iter()
-            .map(|t| bcs::to_bytes(t).expect("Serializing consensus transaction cannot fail"))
-            .collect::<Vec<_>>();
-        // The retrieved LocalNarwhalClient can be from the past epoch. Submit would fail after
-        // Narwhal shuts down, so there should be no correctness issue.
+    // async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
+    //     let transactions = transactions
+    //         .iter()
+    //         .map(|t| bcs::to_bytes(t).expect("Serializing consensus transaction cannot fail"))
+    //         .collect::<Vec<_>>();
+    //     // The retrieved LocalNarwhalClient can be from the past epoch. Submit would fail after
+    //     // Narwhal shuts down, so there should be no correctness issue.
+    //     let client = {
+    //         let c = self.client.load();
+    //         if c.is_some() {
+    //             c
+    //         } else {
+    //             self.client.store(Some(self.get().await));
+    //             self.client.load()
+    //         }
+    //     };
+    //     let client = client.as_ref().unwrap().load();
+    //     client
+    //         .submit_transactions(transactions)
+    //         .await
+    //         .map_err(|e| SuiError::FailedToSubmitToConsensus(format!("{:?}", e)))
+    //         .tap_err(|r| {
+    //             // Will be logged by caller as well.
+    //             warn!("Submit transaction failed with: {:?}", r);
+    //         })?;
+    //     Ok(())
+    // }
+    async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
+        // let transactions = transactions
+        //     .into_iter()
+        //     .map(|raw_data| {
+        //         let mut hasher = DefaultHasher::new();
+        //         hasher.write(raw_data.as_slice());
+        //         let tracking_id = hasher.finish().to_le_bytes();
+        //         let raw_tx = RawTransaction::new_from_data_and_sig(
+        //             raw_data,
+        //             sui_types::crypto::EmptySignInfo {},
+        //         );
+        //         let kind = ConsensusTransactionKind::UserTransaction(Box::new(
+        //             UserTransaction::RawTransaction(raw_tx),
+        //         ));
+        //         ConsensusTransaction { tracking_id, kind }
+        //     })
+        //     .collect::<Vec<ConsensusTransaction>>();
         let client = {
             let c = self.client.load();
             if c.is_some() {
@@ -150,24 +196,5 @@ impl SubmitToConsensus for LazyNarwhalClient {
                 warn!("Submit transaction failed with: {:?}", r);
             })?;
         Ok(())
-    }
-    async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
-        let transactions = transactions
-            .into_iter()
-            .map(|raw_data| {
-                let mut hasher = DefaultHasher::new();
-                hasher.write(raw_data.as_slice());
-                let tracking_id = hasher.finish().to_le_bytes();
-                let raw_tx = RawTransaction::new_from_data_and_sig(
-                    raw_data,
-                    sui_types::crypto::EmptySignInfo {},
-                );
-                let kind = ConsensusTransactionKind::UserTransaction(Box::new(
-                    UserTransaction::RawTransaction(raw_tx),
-                ));
-                ConsensusTransaction { tracking_id, kind }
-            })
-            .collect::<Vec<ConsensusTransaction>>();
-        self.submit_to_consensus(transactions.as_slice()).await
     }
 }

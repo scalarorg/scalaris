@@ -46,19 +46,6 @@ impl ChainTransaction {
     }
 }
 
-// impl Into<ExternalTransaction> for ChainTransaction {
-//     fn into(self) -> ExternalTransaction {
-//         let ChainTransaction {
-//             chain_id,
-//             transaction,
-//         } = self;
-//         ExternalTransaction {
-//             chain_id,
-//             tx_bytes: transaction,
-//         }
-//     }
-// }
-
 impl Into<Vec<ChainTransaction>> for ExternalTransaction {
     fn into(self) -> Vec<ChainTransaction> {
         let ExternalTransaction { chain_id, tx_bytes } = self;
@@ -360,29 +347,19 @@ impl ConsensusService {
             "gRpc service handle consensus_transaction {:?}",
             &transaction_in
         );
-        //Send transaction to the consensus's worker
         let chain_txs: Vec<ChainTransaction> = transaction_in.into();
+        // Submit to consensus layer raw transaction (without chain_id)
         // let raw_transactions = chain_txs
         //     .into_iter()
-        //     .map(|chain_tx| bcs::to_bytes(&chain_tx).expect("Serialization should not fail."))
+        //     .map(|chain_tx| {
+        //         bcs::to_bytes(&chain_tx).expect("Serialization should not fail.")
+        //         //transaction
+        //     })
         //     .collect::<Vec<Vec<u8>>>();
-        //Submit to consensus layer raw transaction (without chain_id)
-        let raw_transactions = chain_txs
-            .into_iter()
-            .map(
-                |ChainTransaction {
-                     chain_id,
-                     transaction,
-                 }| {
-                    //bcs::to_bytes(&chain_tx).expect("Serialization should not fail.")
-                    transaction
-                },
-            )
-            .collect::<Vec<Vec<u8>>>();
         let client = self.consensus_client.clone();
         spawn_monitored_task!(async move {
             if let Err(err) = client
-                .submit_raw_transactions(raw_transactions)
+                .submit_chain_transactions(chain_txs)
                 .await
                 .map_err(|err| anyhow!(err))
             {

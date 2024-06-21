@@ -1,10 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::consensus_service::ChainTransaction;
 use crate::message_envelope::{TrustedExecutableTransaction, VerifiedExecutableTransaction};
 use crate::messages_consensus::UserTransaction;
-use crate::proto::Block;
 use crate::ConsensusOutput as ProtoConsensusOutput;
 use arc_swap::ArcSwap;
 use async_trait::async_trait;

@@ -302,10 +302,10 @@ impl ConsensusClient {
 
 #[async_trait]
 impl SubmitToConsensus for ConsensusClient {
-    async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
-        let client = self.get().await;
-        client.submit_to_consensus(transactions).await
-    }
+    // async fn submit_to_consensus(&self, transactions: &[ConsensusTransaction]) -> SuiResult {
+    //     let client = self.get().await;
+    //     client.submit_to_consensus(transactions).await
+    // }
     async fn submit_raw_transactions(&self, transactions: Vec<RawData>) -> SuiResult {
         let client = self.get().await;
         client.submit_raw_transactions(transactions).await
