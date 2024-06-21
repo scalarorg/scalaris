@@ -10,8 +10,10 @@ pub use types::{
 };
 
 use crate::{
-    consensus_types::{consensus_output_api::ConsensusOutputAPI, AuthorityIndex},
-    messages_consensus::ConsensusTransaction,
+    consensus_service::ChainTransaction,
+    consensus_types::{
+        consensus_output_api::ConsensusOutputAPI, AuthorityIndex, InternalConsensusTransaction,
+    },
 };
 
 impl From<narwhal_types::ConsensusOutput> for ConsensusOutput {
@@ -103,7 +105,7 @@ impl From<consensus_core::CommittedSubDag> for ConsensusOutput {
                 let transactions = block
                     .transactions()
                     .iter()
-                    .filter_map(|tx| extract_raw_transaction(tx.data()).ok())
+                    .filter_map(|tx| extract_raw_transaction(tx.data()))
                     .collect();
                 Block {
                     authority_index,
@@ -115,19 +117,15 @@ impl From<consensus_core::CommittedSubDag> for ConsensusOutput {
     }
 }
 
-fn extract_raw_transaction(transactions: &[u8]) -> anyhow::Result<Vec<u8>> {
-    let consensus_tx: ConsensusTransaction = bcs::from_bytes(transactions)?;
-    match consensus_tx.kind {
-        crate::messages_consensus::ConsensusTransactionKind::UserTransaction(user_tx) => {
-            match user_tx.as_ref().clone() {
-                crate::messages_consensus::UserTransaction::RawTransaction(raw_tx) => {
-                    return Ok(raw_tx.into_data());
-                }
-                crate::messages_consensus::UserTransaction::CertifiedTransaction(_) => {
-                    return Ok(transactions.to_vec())
-                }
-            }
-        }
-        _ => return Ok(transactions.to_vec()),
+fn extract_raw_transaction(transactions: &[u8]) -> Option<Vec<u8>> {
+    let consensus_tx: InternalConsensusTransaction =
+        bcs::from_bytes(transactions).expect("Deserialize consensus output fail");
+    match consensus_tx {
+        InternalConsensusTransaction::ExternalChain(ChainTransaction {
+            chain_id,
+            transaction,
+        }) => Some(transaction),
+        // Internal transaction
+        InternalConsensusTransaction::Consensus(_) => return None,
     }
 }

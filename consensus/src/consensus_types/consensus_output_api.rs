@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 use std::fmt::Display;
 
-use crate::{digests::ConsensusCommitDigest, messages_consensus::ConsensusTransaction};
+use crate::digests::ConsensusCommitDigest;
 use consensus_core::{BlockAPI, CommitDigest};
 use fastcrypto::hash::Hash;
 use narwhal_types::{BatchAPI, CertificateAPI, ConsensusOutputDigest, HeaderAPI};
@@ -10,10 +10,15 @@ use sui_protocol_config::ProtocolConfig;
 
 use crate::consensus_types::AuthorityIndex;
 
+use super::InternalConsensusTransaction;
+
 /// A list of tuples of:
 /// (certificate origin authority index, all transactions corresponding to the certificate).
 /// For each transaction, returns the serialized transaction and the deserialized transaction.
-type ConsensusOutputTransactions<'a> = Vec<(AuthorityIndex, Vec<(&'a [u8], ConsensusTransaction)>)>;
+type ConsensusOutputTransactions<'a> = Vec<(
+    AuthorityIndex,
+    Vec<(&'a [u8], InternalConsensusTransaction)>,
+)>;
 
 pub(crate) trait ConsensusOutputAPI: Display {
     fn reputation_score_sorted_desc(&self) -> Option<Vec<(AuthorityIndex, u64)>>;
@@ -72,12 +77,12 @@ impl ConsensusOutputAPI for narwhal_types::ConsensusOutput {
             .zip(&self.batches)
             .map(|(cert, batches)| {
                 assert_eq!(cert.header().payload().len(), batches.len());
-                let transactions: Vec<(&[u8], ConsensusTransaction)> =
+                let transactions: Vec<(&[u8], InternalConsensusTransaction)> =
                     batches.iter().flat_map(|batch| {
                         let digest = batch.digest();
                         assert!(cert.header().payload().contains_key(&digest));
                         batch.transactions().iter().map(move |serialized_transaction| {
-                            let transaction = match bcs::from_bytes::<ConsensusTransaction>(
+                            let transaction = match bcs::from_bytes::<InternalConsensusTransaction>(
                                 serialized_transaction,
                             ) {
                                 Ok(transaction) => transaction,
@@ -145,7 +150,7 @@ impl ConsensusOutputAPI for consensus_core::CommittedSubDag {
                     .transactions()
                     .iter()
                     .flat_map(|tx| {
-                        let transaction = bcs::from_bytes::<ConsensusTransaction>(tx.data());
+                        let transaction = bcs::from_bytes::<InternalConsensusTransaction>(tx.data());
                         match transaction {
                             Ok(transaction) => Some((
                                 tx.data(),

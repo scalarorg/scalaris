@@ -1,7 +1,10 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-use crate::messages_consensus::{ConsensusTransaction, ConsensusTransactionKind, UserTransaction};
+use crate::{
+    consensus_types::InternalConsensusTransaction,
+    messages_consensus::{ConsensusTransaction, ConsensusTransactionKind, UserTransaction},
+};
 use consensus_core::{TransactionVerifier, ValidationError};
 use eyre::WrapErr;
 use fastcrypto_tbls::dkg;
@@ -120,8 +123,8 @@ impl SuiTxValidator {
     }
 }
 
-fn tx_from_bytes(tx: &[u8]) -> Result<ConsensusTransaction, eyre::Report> {
-    bcs::from_bytes::<ConsensusTransaction>(tx)
+fn tx_from_bytes(tx: &[u8]) -> Result<InternalConsensusTransaction, eyre::Report> {
+    bcs::from_bytes::<InternalConsensusTransaction>(tx)
         .wrap_err("Malformed transaction (failed to deserialize)")
 }
 
@@ -144,12 +147,26 @@ impl TransactionValidator for SuiTxValidator {
         validate_batch_version(b, protocol_config)
             .map_err(|err| eyre::eyre!(format!("Invalid Batch: {err}")))?;
 
+        // let txs = b
+        //     .transactions()
+        //     .iter()
+        //     .map(|tx| tx_from_bytes(tx).map(|tx| tx.kind))
+        //     .collect::<Result<Vec<_>, _>>()?;
         let txs = b
             .transactions()
             .iter()
-            .map(|tx| tx_from_bytes(tx).map(|tx| tx.kind))
-            .collect::<Result<Vec<_>, _>>()?;
-
+            .filter_map(|tx| {
+                tx_from_bytes(tx)
+                    .map(|tx| match tx {
+                        InternalConsensusTransaction::ExternalChain(chain_tx) => None,
+                        InternalConsensusTransaction::Consensus(consensus_tx) => {
+                            Some(consensus_tx.kind)
+                        }
+                    })
+                    .expect("Invalid transaction format")
+                //.map_err(|e| ValidationError::InvalidTransaction(e.to_string()))
+            })
+            .collect::<Vec<_>>();
         self.validate_transactions(txs)
     }
 }
@@ -162,12 +179,18 @@ impl TransactionVerifier for SuiTxValidator {
     ) -> Result<(), ValidationError> {
         let txs = batch
             .iter()
-            .map(|tx| {
+            .filter_map(|tx| {
                 tx_from_bytes(tx)
-                    .map(|tx| tx.kind)
-                    .map_err(|e| ValidationError::InvalidTransaction(e.to_string()))
+                    .map(|tx| match tx {
+                        InternalConsensusTransaction::ExternalChain(chain_tx) => None,
+                        InternalConsensusTransaction::Consensus(consensus_tx) => {
+                            Some(consensus_tx.kind)
+                        }
+                    })
+                    .expect("Invalid transaction format")
+                //.map_err(|e| ValidationError::InvalidTransaction(e.to_string()))
             })
-            .collect::<Result<Vec<_>, _>>()?;
+            .collect::<Vec<_>>();
 
         self.validate_transactions(txs)
             .map_err(|e| ValidationError::InvalidTransaction(e.to_string()))

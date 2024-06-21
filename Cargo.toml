@@ -204,36 +204,36 @@ fastcrypto-tbls = { git = "https://github.com/MystenLabs/fastcrypto", rev = "c10
 fastcrypto-zkp = { git = "https://github.com/MystenLabs/fastcrypto", rev = "c101a5176799db3eb9c801b844e7add92153d291", package = "fastcrypto-zkp" }
 
 # MystenLabs consensus 2.0 bases on Mysticeti version Jun 01, 2024
-bin-version = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "bin-version" }
-consensus-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "consensus-config" }
-consensus-core = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "consensus-core" }
-shared-crypto = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "shared-crypto" }
-mysten-common = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "mysten-common" }
-mysten-metrics = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "mysten-metrics" }
-mysten-network = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "mysten-network" }
-sui-archival = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-archival" }
-sui-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-config" }
-sui-core = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-core" }
-sui-protocol-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-protocol-config" }
-sui-macros = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-macros" }
-sui-network = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-network" }
-sui-storage = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-storage" }
-sui-swarm-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-swarm-config" }
-sui-tls = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-tls" }
-sui-types = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "sui-types" }
-telemetry-subscribers = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "telemetry-subscribers" }
-typed-store = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "typed-store" }
-typed-store-derive = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "typed-store-derive" }
+bin-version = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "bin-version" }
+consensus-config = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "consensus-config" }
+consensus-core = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "consensus-core" }
+shared-crypto = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "shared-crypto" }
+mysten-common = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "mysten-common" }
+mysten-metrics = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "mysten-metrics" }
+mysten-network = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "mysten-network" }
+sui-archival = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-archival" }
+sui-config = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-config" }
+sui-core = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-core" }
+sui-protocol-config = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-protocol-config" }
+sui-macros = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-macros" }
+sui-network = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-network" }
+sui-storage = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-storage" }
+sui-swarm-config = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-swarm-config" }
+sui-tls = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-tls" }
+sui-types = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "sui-types" }
+telemetry-subscribers = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "telemetry-subscribers" }
+typed-store = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "typed-store" }
+typed-store-derive = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "typed-store-derive" }
 
 # For narwhal support
-narwhal-config = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-config" }
-narwhal-crypto = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-crypto" }
-narwhal-executor = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-executor" }
-narwhal-network = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-network" }
-narwhal-node = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-node" }
-narwhal-types = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-types" }
-narwhal-worker = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-worker" }
-narwhal-test-utils = { git = "https://github.com/MystenLabs/sui", rev = "14bc4d515100dfa8326e9f08b7e72335cf5467d7", package = "narwhal-test-utils" }
+narwhal-config = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-config" }
+narwhal-crypto = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-crypto" }
+narwhal-executor = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-executor" }
+narwhal-network = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-network" }
+narwhal-node = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-node" }
+narwhal-types = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-types" }
+narwhal-worker = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-worker" }
+narwhal-test-utils = { git = "https://github.com/scalarorg/sui", rev = "82b5cc2535ee79a7fb82417231e0feeef6a34750", package = "narwhal-test-utils" }
 
 
 #consensus-config = { path = "../sui/consensus/config", package = "consensus-config" }

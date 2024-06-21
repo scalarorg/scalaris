@@ -332,7 +332,7 @@ impl RandomnessManager {
         });
         if !fail_point_skip_sending {
             self.consensus_client
-                .submit_to_consensus(&[transaction])
+                .submit_consensus_transaction(transaction)
                 .await?;
         }
 
@@ -405,7 +405,7 @@ impl RandomnessManager {
                     });
                     if !fail_point_skip_sending {
                         self.consensus_client
-                            .submit_to_consensus(&[transaction])
+                            .submit_consensus_transaction(transaction)
                             .await?;
                     }
 

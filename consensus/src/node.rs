@@ -230,8 +230,8 @@ impl ConsensusNode {
                                 for (id, jwk) in keys.into_iter() {
                                     info!("Submitting JWK to consensus: {:?}", id);
 
-                                    let txn = [ConsensusTransaction::new_jwk_fetched(authority, id, jwk)];
-                                    consensus_client.submit_to_consensus(&txn).await
+                                    let txn = ConsensusTransaction::new_jwk_fetched(authority, id, jwk);
+                                    consensus_client.submit_consensus_transaction(txn).await
                                         .tap_err(|e| warn!("Error when submitting JWKs to consensus {:?}", e))
                                         .ok();
                                 }

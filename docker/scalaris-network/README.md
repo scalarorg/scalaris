@@ -35,3 +35,9 @@ Here's an example of how to build a `sui` binary that creates a genesis which is
 git checkout releases/sui-v1.19.0-release
 cargo build --bin sui
 ```
+
+Run Grpc client test
+
+```
+cargo test --test grpc_client -- --nocapture
+```
