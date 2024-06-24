@@ -22,7 +22,7 @@ use tokio::sync::mpsc::{self, UnboundedSender};
 use tokio::task::JoinHandle;
 use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 use tonic::Response;
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
 use crate::authority::AuthorityState;
 use crate::consensus_client::SubmitToConsensus;
@@ -265,7 +265,7 @@ impl crate::ConsensusApi for ConsensusService {
         &self,
         request: tonic::Request<RequestEcho>,
     ) -> ConsensusServiceResult<ResponseEcho> {
-        info!("ConsensusServiceServer::echo");
+        debug!("ConsensusServiceServer::echo");
         let echo_message = request.into_inner().message;
 
         Ok(Response::new(ResponseEcho {
@@ -343,7 +343,7 @@ impl ConsensusService {
         &self,
         transaction_in: ExternalTransaction,
     ) -> Result<()> {
-        info!(
+        debug!(
             "gRpc service handle consensus_transaction {:?}",
             &transaction_in
         );
