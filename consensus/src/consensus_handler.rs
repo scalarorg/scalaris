@@ -27,7 +27,7 @@ use sui_types::{
 };
 use tokio::sync::mpsc::{Receiver, Sender, UnboundedSender};
 use tokio::sync::RwLock;
-use tracing::{info, instrument};
+use tracing::{debug, info, instrument};
 
 use crate::{
     authority::{
@@ -217,7 +217,7 @@ impl<C> ConsensusHandler<C> {
         consensus_listener: Arc<ConsensusListener>,
     ) {
         while let Some(consensus_out) = recv.recv().await {
-            info!("Handle consensus output {:?}", &consensus_out);
+            debug!("Handle consensus output {:?}", &consensus_out);
             let _guard = monitored_scope("ConsensusHandler::enqueue");
             consensus_listener.notify(consensus_out).await;
         }
