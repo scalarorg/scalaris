@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  scalaris-builder:
+    build:
+      context: ./
+      dockerfile: ./rust.Dockerfile
+    container_name: scalaris-builder
+    working_dir: /workspace
+    command: sleep infinity
+    restart: no
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "10"
+        max-size: "1g"

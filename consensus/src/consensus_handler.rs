@@ -130,19 +130,17 @@ impl ConsensusListener {
     }
     // Send consensus result to all client
     pub async fn notify(&self, consensus_output: ProtoConsensusOutput) {
-        // let transactions = chain_transactions
-        //     .into_iter()
-        //     .map(|ns_tx| ns_tx.into())
-        //     .collect::<Vec<ExternalTransaction>>();
-        // let commited_transactions = CommitedTransactions { transactions };
-        let senders = self.senders.read().await;
-        let mut handles = vec![];
+        let mut senders = self.senders.write().await;
+        let mut error_senders = vec![];
         //Loop throw all channel sender
-        for sender in senders.iter() {
-            let send_transactions = consensus_output.clone();
-            let clone_sender = sender.clone();
-            let handle = tokio::spawn(async move { clone_sender.send(Ok(send_transactions)) });
-            handles.push(handle);
+        for (index, sender) in senders.iter().enumerate() {
+            if let Err(_) = sender.send(Ok(consensus_output.clone())) {
+                error_senders.push(index);
+            }
+        }
+        //Remove error senders from senders list in reversed order
+        for err_ind in error_senders.into_iter().rev() {
+            senders.remove(err_ind);
         }
     }
 }
@@ -597,6 +595,10 @@ impl MysticetiConsensusHandler {
     ) -> Self {
         let handle = spawn_monitored_task!(async move {
             while let Some(consensus_output) = receiver.recv().await {
+                debug!(
+                    "Received commitedSub Dag from leader round {}",
+                    consensus_output.leader_round()
+                );
                 let proto_consensus_output = ProtoConsensusOutput::from(consensus_output);
                 consensus_handler
                     .deliver_consensus_output(proto_consensus_output)

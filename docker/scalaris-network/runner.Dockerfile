@@ -8,10 +8,9 @@ WORKDIR "$WORKDIR/scalaris"
 
 # Both bench and release profiles copy from release dir
 #COPY --from=builder /scalaris/target/release/scalaris /opt/sui/bin/scalaris
-COPY target/release/scalaris /opt/scalaris/bin/scalaris
 # Support legacy usages of /usr/local/bin/scalaris
 #COPY --from=builder /scalaris/target/release/scalaris /usr/local/bin
-COPY target/release/scalaris /usr/local/bin
+COPY scalaris /usr/local/bin
 
 ARG BUILD_DATE
 ARG GIT_REVISION

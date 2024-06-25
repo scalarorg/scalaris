@@ -9,6 +9,7 @@ RUNNER_DOCKERFILE="$DIR/runner.Dockerfile"
 IMAGE=scalaris/rust:1.75-bullseye
 GIT_REVISION="$(git describe --always --abbrev=12 --dirty --exclude '*')"
 BUILD_DATE="$(date -u +'%Y-%m-%d')"
+CONTAINER_BUILDER=scalaris-builder
 
 # option to build using debug symbols
 if [ "$1" = "--debug-symbols" ]; then
@@ -27,19 +28,17 @@ echo "build date: \t$BUILD_DATE"
 echo "git revision: \t$GIT_REVISION"
 echo
 
-runner() {
-	docker start scalaris_builder
-	docker exec -it scalaris_builder cargo build --profile ${PROFILE} --bin scalaris 
-	docker stop scalaris_builder
-	docker build -f "${RUNNER_DOCKERFILE}" -t scalaris/consensus:latest ${DIR}/../..
-}
-
-builder() {
-	docker build -f "${RUST_DOCKERFILE}" -t ${IMAGE} .
-	docker run --name scalaris_builder \
-		-v ${DIR}/../..:/workspace \
-		-w /workspace \
-		-d ${IMAGE} sleep infinity
-}
-
-$@
+docker-compose -f ${DIR}/docker-compose-builder.yaml up -d
+cd ${REPO_ROOT}
+docker cp Cargo.toml ${CONTAINER_BUILDER}:/workspace
+docker cp Cargo.lock ${CONTAINER_BUILDER}:/workspace
+docker cp consensus ${CONTAINER_BUILDER}:/workspace
+docker exec ${CONTAINER_BUILDER} cargo build --profile ${PROFILE} --bin scalaris
+docker cp ${CONTAINER_BUILDER}:/workspace/target/release/scalaris ${REPO_ROOT}/scalaris
+echo "docker context: $REPO_ROOT"
+docker build -f "${RUNNER_DOCKERFILE}" "$REPO_ROOT" \
+	--build-arg GIT_REVISION="$GIT_REVISION" \
+	--build-arg BUILD_DATE="$BUILD_DATE" \
+	--build-arg PROFILE="$PROFILE" \
+	"$@"
+rm ${REPO_ROOT}/scalaris
