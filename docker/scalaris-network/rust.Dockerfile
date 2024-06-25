@@ -1,4 +1,4 @@
-FROM rust:1.78.0-bookworm
+FROM rust:1.78.0-bookworm as builder
 ARG PROFILE=release
 ARG GIT_REVISION
 ENV GIT_REVISION=$GIT_REVISION

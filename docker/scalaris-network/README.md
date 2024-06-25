@@ -13,6 +13,14 @@ cd docker/scalaris-network
 docker/scalaris-network/build.sh -t scalaris:latest
 ```
 
+Build scalar within running container
+
+```
+cd docker/scalar-network
+./build_container.sh -t scalaris:latest
+
+```
+
 2. Build genesis (Required for first startup)
 
 ```
