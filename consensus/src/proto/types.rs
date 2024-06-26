@@ -76,6 +76,25 @@ pub struct ExternalTransaction {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Message {
+    #[prost(bytes = "vec", tag = "1")]
+    pub content: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct Certificate {
+    /// input message
+    #[prost(message, optional, tag = "1")]
+    pub message: ::core::option::Option<Message>,
+    /// Round to make cerificate
+    #[prost(uint32, tag = "2")]
+    pub round: u32,
+    /// Aggregate signature from 2f + 1 signature
+    #[prost(bytes = "vec", tag = "3")]
+    pub signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ReputationScore {
     #[prost(uint32, tag = "1")]
     pub authority_index: u32,

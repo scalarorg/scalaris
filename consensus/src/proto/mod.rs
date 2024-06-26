@@ -5,8 +5,8 @@ use fastcrypto::hash::Hash;
 use narwhal_types::{BatchAPI, CertificateAPI, HeaderAPI};
 pub use service::consensus_api_server::*;
 pub use types::{
-    Block, ConsensusOutput, Empty, ExternalTransaction, ReputationScore, RequestEcho, ResponseEcho,
-    ValidatorInfo, ValidatorState,
+    Block, Certificate, ConsensusOutput, Empty, ExternalTransaction, Message, ReputationScore,
+    RequestEcho, ResponseEcho, ValidatorInfo, ValidatorState,
 };
 
 use crate::{

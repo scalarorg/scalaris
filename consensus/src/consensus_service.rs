@@ -1,9 +1,13 @@
 // Copyright (c) Scalaris, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
+use crate::authority::authority_aggregator::AuthorityAggregator;
+use crate::network::NetworkAuthorityClient;
 use crate::proto::{
-    Empty, ExternalTransaction, RequestEcho, ResponseEcho, ValidatorInfo, ValidatorState,
+    Certificate, Empty, ExternalTransaction, Message, RequestEcho, ResponseEcho, ValidatorInfo,
+    ValidatorState,
 };
+use crate::transaction::RawTransaction;
 use anyhow::{anyhow, Result};
 use mysten_metrics::histogram::Histogram as MystenHistogram;
 use mysten_metrics::spawn_monitored_task;
@@ -24,7 +28,7 @@ use tokio_stream::{wrappers::UnboundedReceiverStream, StreamExt};
 use tonic::Response;
 use tracing::{debug, error, info};
 
-use crate::authority::AuthorityState;
+use crate::authority::{AuthorityState, AuthorityVerifyState};
 use crate::consensus_client::SubmitToConsensus;
 use crate::consensus_handler::ConsensusListener;
 use crate::consensus_manager::ConsensusClient;
@@ -207,6 +211,8 @@ impl ConsensusServiceMetrics {
 #[derive(Clone)]
 pub struct ConsensusService {
     state: Arc<AuthorityState>,
+    verify_state: Arc<AuthorityVerifyState>,
+    validators: Arc<AuthorityAggregator<NetworkAuthorityClient>>,
     //Client for send transaction into consensus component
     consensus_client: Arc<ConsensusClient>,
     //Listener for consensus output
@@ -218,6 +224,8 @@ pub struct ConsensusService {
 impl ConsensusService {
     pub fn new(
         state: Arc<AuthorityState>,
+        verify_state: Arc<AuthorityVerifyState>,
+        validators: Arc<AuthorityAggregator<NetworkAuthorityClient>>,
         consensus_client: Arc<ConsensusClient>,
         consensus_listener: Arc<ConsensusListener>,
         validator_metrics: Arc<ConsensusServiceMetrics>,
@@ -227,6 +235,8 @@ impl ConsensusService {
     ) -> Self {
         Self {
             state,
+            verify_state,
+            validators,
             consensus_client,
             consensus_listener,
             metrics: validator_metrics,
@@ -256,6 +266,20 @@ impl ConsensusService {
     }
     pub fn validator_state(&self) -> &Arc<AuthorityState> {
         &self.state
+    }
+    async fn handle_verify_message(&self, message: Message) -> ConsensusServiceResult<Certificate> {
+        let Message { content } = message;
+        let message_data =
+            bcs::to_bytes(content.as_slice()).expect("Serialization should not fail.");
+        // Store custom message;
+        self.verify_state.add_verify_message(content).await;
+        // Broadcast to all consensus nodes
+        let raw_transaction = RawTransaction::new(message_data);
+        let _res = self
+            .validators
+            .process_certificate(raw_transaction, None)
+            .await;
+        todo!("handle verify message request")
     }
 }
 #[tonic::async_trait]
@@ -295,6 +319,15 @@ impl crate::ConsensusApi for ConsensusService {
         };
 
         Ok(Response::new(state))
+    }
+
+    async fn get_certificate(
+        &self,
+        request: tonic::Request<Message>,
+    ) -> ConsensusServiceResult<Certificate> {
+        info!("ConsensusServiceServer::get_certificate");
+        let message = request.into_inner();
+        self.handle_verify_message(message).await
     }
 
     /*

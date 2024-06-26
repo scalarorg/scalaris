@@ -15,6 +15,7 @@ pub(crate) mod committee_api;
 pub(crate) mod consensus_output_api;
 pub(crate) mod message_envelope;
 pub(crate) mod messages_consensus;
+pub(crate) mod messages_grpc;
 pub(crate) mod signature_verification;
 pub mod sui_serde;
 pub(crate) mod transaction;
@@ -22,9 +23,9 @@ pub(crate) mod transaction;
 pub mod error {
     pub use sui_types::error::*;
 }
-
+pub use messages_grpc::HandleVerifyMessageResponse;
 pub use sui_types::object::OBJECT_START_VERSION;
-
+pub use transaction::RawTransaction;
 /// An unique integer ID for a validator used by consensus.
 /// In Narwhal, this is the inner value of the `AuthorityIdentifier` type.
 /// In Mysticeti, this is used the same way as the AuthorityIndex type there.

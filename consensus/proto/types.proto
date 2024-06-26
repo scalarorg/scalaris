@@ -42,6 +42,14 @@ message ExternalTransaction {
   string chain_id = 1;            //Namespace used to classify services
   repeated bytes tx_bytes = 2;    //Transaction hash or some raw data 
 }
+message Message {
+  bytes content = 1;
+}
+message Certificate {
+  Message message = 1;          //input message
+  uint32 round = 2;             //Round to make cerificate
+  bytes signature = 3;          //Aggregate signature from 2f + 1 signature
+}
 
 message ReputationScore {
   uint32 authority_index = 1;

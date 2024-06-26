@@ -50,7 +50,7 @@ use sui_core::{
     epoch::committee_store::CommitteeStore,
     execution_cache::{
         CheckpointCache, ExecutionCacheCommit, ExecutionCacheReconfigAPI,
-        ExecutionCacheTraitPointers, StateSyncAPI,
+        ExecutionCacheTraitPointers, ObjectCacheRead, StateSyncAPI, TransactionCacheRead,
     },
     overload_monitor::{overload_monitor_accept_tx, AuthorityOverloadInfo},
     state_accumulator::{AccumulatorStore, StateAccumulator},
@@ -2021,14 +2021,14 @@ impl AuthorityState {
         state
     }
 
-    // // TODO: Consolidate our traits to reduce the number of methods here.
-    // pub fn get_object_cache_reader(&self) -> &Arc<dyn ObjectCacheRead> {
-    //     &self.execution_cache_trait_pointers.object_cache_reader
-    // }
+    // TODO: Consolidate our traits to reduce the number of methods here.
+    pub fn get_object_cache_reader(&self) -> &Arc<dyn ObjectCacheRead> {
+        &self.execution_cache_trait_pointers.object_cache_reader
+    }
 
-    // pub fn get_transaction_cache_reader(&self) -> &Arc<dyn TransactionCacheRead> {
-    //     &self.execution_cache_trait_pointers.transaction_cache_reader
-    // }
+    pub fn get_transaction_cache_reader(&self) -> &Arc<dyn TransactionCacheRead> {
+        &self.execution_cache_trait_pointers.transaction_cache_reader
+    }
 
     // pub fn get_cache_writer(&self) -> &Arc<dyn ExecutionCacheWrite> {
     //     &self.execution_cache_trait_pointers.cache_writer

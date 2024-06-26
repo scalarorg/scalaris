@@ -12,15 +12,18 @@ pub use sui_core::authority::{
 use sui_types::committee::EpochId;
 use sui_types::crypto::Signer;
 use sui_types::digests::ChainIdentifier;
+pub use verify_state::AuthorityVerifyState;
 
 use sui_types::crypto::AuthoritySignature;
 use sui_types::crypto::RandomnessRound;
 use tokio::{sync::mpsc, task::JoinHandle};
 use tracing::{info, instrument, warn};
+pub mod authority_aggregator;
 pub mod authority_per_epoch_store;
 pub mod metrics;
 pub mod state;
 pub mod test_authority_builder;
+pub mod verify_state;
 pub mod authority_store_tables {
     pub(crate) const ENV_VAR_LOCKS_BLOCK_CACHE_SIZE: &str = "LOCKS_BLOCK_CACHE_MB";
     pub use sui_core::authority::authority_store_tables::*;
@@ -37,6 +40,7 @@ pub mod shared_object_congestion_tracker {
 pub mod transaction_deferral {
     pub use sui_core::authority::transaction_deferral::*;
 }
+
 /// a Trait object for `Signer` that is:
 /// - Pin, i.e. confined to one place in memory (we don't want to copy private keys).
 /// - Sync, i.e. can be safely shared between threads.

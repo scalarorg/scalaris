@@ -1,9 +1,14 @@
-use crate::authority::{AuthorityPerEpochStore, RandomnessRoundReceiver};
+use crate::authority::authority_aggregator::AuthorityAggregator;
+use crate::authority::{AuthorityPerEpochStore, AuthorityVerifyState, RandomnessRoundReceiver};
 use crate::checkpoints::{CheckpointMetrics, CheckpointService, CheckpointStore};
 // use crate::consensus_adapter::ConnectionMonitorStatus;
 use crate::epoch::randomness::RandomnessManager;
 use crate::messages_consensus::{
     check_total_jwk_size, AuthorityCapabilities, ConsensusTransaction,
+};
+use crate::network::{
+    safe_client::SafeClientMetricsBase, NetworkAuthorityClient, ValidatorServer, ValidatorService,
+    ValidatorServiceMetrics,
 };
 // use crate::signature_verifier::SignatureVerifierMetrics;
 // use crate::storage::RocksDbStore;
@@ -32,6 +37,7 @@ use sui_config::node::{DBCheckpointConfig, RunWithRange};
 use sui_config::node_config_metrics::NodeConfigMetrics;
 use sui_core::authority::authority_store_tables::AuthorityPerpetualTables;
 use sui_core::authority::CHAIN_IDENTIFIER;
+use sui_core::authority_aggregator::AuthAggMetrics;
 use sui_core::consensus_adapter::ConnectionMonitorStatus;
 use sui_core::epoch::committee_store::CommitteeStore;
 use sui_core::epoch::data_removal::EpochDataRemover;
@@ -46,7 +52,7 @@ use sui_network::discovery::{self, TrustedPeerChangeEvent};
 use sui_network::randomness;
 use sui_protocol_config::ProtocolConfig;
 use sui_types::base_types::AuthorityName;
-use sui_types::committee::{Committee, EpochId};
+use sui_types::committee::{Committee, CommitteeWithNetworkMetadata, EpochId};
 use sui_types::crypto::RandomnessRound;
 use sui_types::digests::ChainIdentifier;
 use sui_types::error::{SuiError, SuiResult};
@@ -101,6 +107,7 @@ pub struct ConsensusNode {
     config: NodeConfig,
     components: Mutex<NodeComponents>,
     state: Arc<AuthorityState>,
+    verify_state: Arc<AuthorityVerifyState>,
     registry_service: RegistryService,
     metrics: Arc<SuiNodeMetrics>,
     // state_sync_handle: state_sync::Handle,
@@ -427,6 +434,7 @@ impl ConsensusNode {
             archive_readers,
         )
         .await;
+        let verify_state = Arc::new(AuthorityVerifyState::new());
         // ensure genesis txn was executed
         // 20240606 TaiVV Execution layer
         if epoch_store.epoch() == 0 {
@@ -462,11 +470,11 @@ impl ConsensusNode {
             .epoch_start_state()
             .get_authority_names_to_peer_ids();
 
-        let network_connection_metrics =
-            NetworkConnectionMetrics::new("sui", &registry_service.default_registry());
+        let network_connection_metrics = NetworkConnectionMetrics::new("sui", &prometheus_registry);
+        let validator_display_names = Arc::new(authority_names_to_peer_ids);
 
-        let authority_names_to_peer_ids = ArcSwap::from_pointee(authority_names_to_peer_ids);
-
+        //let authority_names_to_peer_ids = ArcSwap::from_pointee(authority_names_to_peer_ids);
+        let authority_names_to_peer_ids = ArcSwap::from(validator_display_names.clone());
         let (_connection_monitor_handle, connection_statuses) =
             narwhal_network::connectivity::ConnectionMonitor::spawn(
                 p2p_network.downgrade(),
@@ -481,11 +489,27 @@ impl ConsensusNode {
         };
 
         let connection_monitor_status = Arc::new(connection_monitor_status);
-        let sui_node_metrics = Arc::new(SuiNodeMetrics::new(&registry_service.default_registry()));
+        let sui_node_metrics = Arc::new(SuiNodeMetrics::new(&prometheus_registry));
+
+        let safe_client_metrics_base = SafeClientMetricsBase::new(&prometheus_registry);
+        let auth_agg_metrics = AuthAggMetrics::new(&prometheus_registry);
+        //state.get_sui_system_state_object_unsafe()
+        // let committee_network_metadata = CommitteeWithNetworkMetadata {
+        //     committee: todo!(),
+        //     network_metadata: todo!(),
+        // };
+        // let validators = AuthorityAggregator::new_from_committee(
+        //     committee_network_metadata,
+        //     state.committee_store(),
+        //     safe_client_metrics_base.clone(),
+        //     Arc::new(auth_agg_metrics),
+        //     validator_display_names,
+        // )?;
 
         let components = Self::construct_components(
             config.clone(),
             state.clone(),
+            verify_state.clone(),
             committee,
             epoch_store.clone(),
             checkpoint_store.clone(),
@@ -502,6 +526,7 @@ impl ConsensusNode {
             config,
             components: Mutex::new(components),
             state,
+            verify_state,
             registry_service,
             metrics: sui_node_metrics,
             // state_sync_handle,
@@ -661,6 +686,7 @@ impl ConsensusNode {
     async fn construct_components(
         config: NodeConfig,
         state: Arc<AuthorityState>,
+        verify_state: Arc<AuthorityVerifyState>,
         committee: Arc<Committee>,
         epoch_store: Arc<AuthorityPerEpochStore>,
         checkpoint_store: Arc<CheckpointStore>,
@@ -697,16 +723,27 @@ impl ConsensusNode {
         // This only gets started up once, not on every epoch. (Make call to remove every epoch.)
         consensus_epoch_data_remover.run().await;
 
-        let checkpoint_metrics = CheckpointMetrics::new(&registry_service.default_registry());
+        let prometheus_registry = registry_service.default_registry();
+        let checkpoint_metrics = CheckpointMetrics::new(&prometheus_registry);
         let sui_tx_validator_metrics =
             TxValidatorMetrics::new(&registry_service.default_registry());
+
+        let validators = AuthorityAggregator::new_from_local_system_state(
+            state.get_object_cache_reader(),
+            state.committee_store(),
+            SafeClientMetricsBase::new(&prometheus_registry),
+            AuthAggMetrics::new(&prometheus_registry),
+        )?;
+        let validators = Arc::new(validators);
         info!("Start grpc consensus service");
         let validator_server_handle = Self::start_grpc_consensus_service(
             &config,
             state.clone(),
+            verify_state.clone(),
+            validators,
             client.clone(),
             consensus_listener.clone(),
-            &registry_service.default_registry(),
+            &prometheus_registry,
         )
         .await?;
 
@@ -909,12 +946,16 @@ impl ConsensusNode {
     async fn start_grpc_consensus_service(
         config: &NodeConfig,
         state: Arc<AuthorityState>,
+        verify_state: Arc<AuthorityVerifyState>,
+        validators: Arc<AuthorityAggregator<NetworkAuthorityClient>>,
         consensus_client: Arc<ConsensusClient>,
         consensus_listener: Arc<ConsensusListener>,
         prometheus_registry: &Registry,
     ) -> Result<tokio::task::JoinHandle<Result<()>>> {
         let consensus_service = ConsensusService::new(
             state.clone(),
+            verify_state.clone(),
+            validators,
             consensus_client,
             consensus_listener,
             Arc::new(ConsensusServiceMetrics::new(prometheus_registry)),
@@ -922,15 +963,23 @@ impl ConsensusNode {
             config.policy_config.clone(),
             config.firewall_config.clone(),
         );
-        let consensus_server = crate::ConsensusApiServer::new(consensus_service);
+
+        let validator_service = ValidatorService::new(
+            verify_state,
+            Arc::new(ValidatorServiceMetrics::new(prometheus_registry)),
+            TrafficControllerMetrics::new(prometheus_registry),
+            config.policy_config.clone(),
+            config.firewall_config.clone(),
+        );
         let mut server_conf = mysten_network::config::Config::new();
         server_conf.global_concurrency_limit = config.grpc_concurrency_limit;
         server_conf.load_shed = config.grpc_load_shed;
         let mut server_builder =
             ServerBuilder::from_config(&server_conf, GrpcMetrics::new(prometheus_registry));
 
-        server_builder = server_builder.add_service(consensus_server);
-
+        server_builder = server_builder
+            .add_service(crate::ConsensusApiServer::new(consensus_service))
+            .add_service(ValidatorServer::new(validator_service));
         let server = server_builder
             .bind(config.network_address())
             .await

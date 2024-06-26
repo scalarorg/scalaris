@@ -9,6 +9,7 @@ pub(crate) mod consensus_types;
 pub mod consensus_validator;
 pub mod epoch;
 pub mod metrics;
+pub mod network;
 pub mod node;
 pub mod post_consensus_tx_reorder;
 pub mod proto;
@@ -20,6 +21,7 @@ pub(crate) use consensus_types::{message_envelope, messages_consensus, transacti
 pub use node::ConsensusNode;
 pub use sui_config::NodeConfig;
 mod transaction_input_loader;
+use fastcrypto::hash::HashFunction;
 pub use proto::{ConsensusApi, ConsensusApiServer, ConsensusOutput, ExternalTransaction};
 /*
 * Re export modules from sui_types
@@ -71,4 +73,11 @@ pub mod signature_verification {
 
 pub mod programmable_transaction_builder {
     pub use sui_types::programmable_transaction_builder::*;
+}
+
+pub fn to_digest(bytes: &[u8]) -> [u8; 32] {
+    let mut hasher = fastcrypto::hash::Blake2b256::new();
+    hasher.update(bytes);
+    let digest = <[u8; 32]>::from(hasher.finalize());
+    digest
 }

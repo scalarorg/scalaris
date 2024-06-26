@@ -9,6 +9,7 @@ import "types.proto";
    rpc Echo(types.RequestEcho) returns (types.ResponseEcho);
    rpc GetValidatorInfo(types.Empty) returns (types.ValidatorInfo);
    rpc GetValidatorState(types.Empty) returns (types.ValidatorState);
+   rpc GetCertificate(types.Message) returns (types.Certificate);
    // BidirectionalStreamingScalarAbci is bidi streaming.
    rpc InitTransaction(stream types.ExternalTransaction) returns (stream types.ConsensusOutput) {}
- }
+}
