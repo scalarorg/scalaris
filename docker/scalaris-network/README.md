@@ -10,7 +10,7 @@ Steps for running:
 
 ```
 cd docker/scalaris-network
-docker/scalaris-network/build.sh -t scalaris:latest
+./build.sh scalaris -t scalaris:latest
 ```
 
 Build scalar within running container
