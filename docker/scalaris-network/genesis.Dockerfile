@@ -7,6 +7,7 @@ RUN apt install python3 python3-pip -y
 # copy configuration files to root
 COPY ./new-genesis.sh /new-genesis.sh
 COPY ./genesis /genesis
+COPY ./genesis/genesis.yaml /genesis/files/genesis.yaml
 
 WORKDIR /
 
