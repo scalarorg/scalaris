@@ -17,7 +17,7 @@ Build scalar within running container
 
 ```
 cd docker/scalar-network
-./build_container.sh -t scalaris:latest
+./build.sh scalaris -t scalaris:latest
 
 ```
 
